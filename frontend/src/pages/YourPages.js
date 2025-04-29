@@ -1,58 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// const YourPages = () => {
-//   const [pages, setPages] = useState([]);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const fetchPages = async () => {
-//       try {
-//         const res = await fetch("http://localhost:5000/api/pages/list-pages");
-//         const data = await res.json();
-//         setPages(data.pages);
-//       } catch (err) {
-//         console.error("❌ Error fetching pages:", err);
-//       }
-//     };
-
-//     fetchPages();
-//   }, []);
-
-//   return (
-//     <div className="p-6 bg-white min-h-screen text-black relative">
-//       {/* Back button */}
-//       <button
-//         onClick={() => navigate("/dashboard")}
-//         className="absolute top-6 right-6 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
-//       >
-//         Back to Dashboard
-//       </button>
-
-//       <h1 className="text-2xl font-bold mb-4">Your Generated Pages</h1>
-//       {pages.length === 0 ? (
-//         <p>No pages found.</p>
-//       ) : (
-//         <ul className="space-y-2">
-//           {pages.map((page) => (
-//             <li
-//               key={page}
-//               className="cursor-pointer text-blue-600 hover:underline"
-//               onClick={() => navigate(`/generated/${page}`)}
-//             >
-//               {page}
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default YourPages;
-
-
-
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -111,7 +56,7 @@ const YourPages = () => {
     <div className="p-6 bg-white min-h-screen text-black relative">
       {/* Back button */}
       <button
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("/admin-dashboard")}
         className="absolute top-6 right-6 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
       >
         Back to Dashboard

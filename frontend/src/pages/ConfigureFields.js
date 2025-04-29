@@ -4,11 +4,15 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/Button1"; 
 
 
+
+
+
 const ConfigureFields = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedComponents = location.state?.selectedComponents || {};
   const [fieldConfigs, setFieldConfigs] = useState({});
+  
   
   const handleChange = (key, field, value) => {
     setFieldConfigs((prev) => ({
@@ -25,17 +29,16 @@ const ConfigureFields = () => {
   };
 
   const handleFinish = async () => {
+    
     console.log("Final Field Configurations:", fieldConfigs);
 
-    
-  
     try {
       const response = await fetch("http://localhost:5000/api/pages/generate-form", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(fieldConfigs ),
+        body: JSON.stringify(fieldConfigs),
       });
   
       if (response.ok) {
@@ -67,15 +70,6 @@ const ConfigureFields = () => {
         </>
         
       </div>
-      
-      {/* <input
-        type="text"
-        placeholder="Enter custom page name"
-        className="text-black w-full p-2 rounded mb-4"
-        value={pageName}
-        onChange={(e) => setPageName(e.target.value.trim())} /> */}
-
-
       {Object.entries(selectedComponents).map(([key, value]) => {
         const quantity = value.quantity || 0;
 
