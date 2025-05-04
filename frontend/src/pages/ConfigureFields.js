@@ -12,6 +12,7 @@ const ConfigureFields = () => {
   const navigate = useNavigate();
   const selectedComponents = location.state?.selectedComponents || {};
   const [fieldConfigs, setFieldConfigs] = useState({});
+  const [customPageName, setCustomPageName] = useState("");
   
   
   const handleChange = (key, field, value) => {
@@ -28,36 +29,63 @@ const ConfigureFields = () => {
     navigate("/your-pages");
   };
 
-  const handleFinish = async () => {
-    
-    console.log("Final Field Configurations:", fieldConfigs);
 
+  const handleFinish = async () => {
+    if (!customPageName.trim()) {
+      alert("Please enter a custom page name.");
+      return;
+    }
+  
+    const cleanPageName = customPageName.trim().replace(/\s+/g, "_");
+    const payload = {
+      pageName: cleanPageName,
+      fieldConfigs,
+    };
+  
     try {
       const response = await fetch("http://localhost:5000/api/pages/generate-form", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(fieldConfigs),
+        body: JSON.stringify(payload),
       });
   
       if (response.ok) {
         const result = await response.json();
         alert("✅ Page generated successfully!");
         console.log("Generated Page Info:", result);
-        navigate(`/generated/${result.fileName.replace(".js", "")}`);
   
-        // Optional: navigate to the generated page if you have its route
-        // navigate(`/generated/${result.pageName}`);
+        // 👉 Save Page Details to Database
+        const saveDetails = await fetch("http://localhost:5000/api/auth/save-page-details", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            PageName: customPageName,
+            StoragePath : `frontend\\src\\pages\\generated\\${result.fileName}`,// Assuming fileName is returned
+            CreatedByAdminID: "Ad01",
+          }),
+        });
+  
+        const saveResult = await saveDetails.json();
+  
+        if (!saveDetails.ok) {
+          alert("⚠️ Page generated, but failed to save page info in DB.");
+          console.error("DB Save Error:", saveResult.message);
+        }
+  
+        navigate(`/generated/${result.fileName.replace(".js", "")}`);
       } else {
-        console.error("❌ Page generation failed.");
-        alert("Failed to generate the page.");
+        alert("❌ Failed to generate the page.");
       }
     } catch (error) {
-      console.error("❌ Error sending config:", error);
-      alert("Error occurred while generating page.");
+      console.error("❌ Error:", error);
+      alert("Error occurred while generating and saving the page.");
     }
   };
+  
   
   return (
     <div className="p-6 text-white bg-cyan-300 min-h-screen">
@@ -66,10 +94,18 @@ const ConfigureFields = () => {
         <h1 className="text-2xl font-bold mb-4 text-black">Configure Fields</h1>
         <>
         <Button text="Your Pages" onClick={handleYourPagesClick} className="bg-green-500" />
-        <Button text="Back to Dashboard" onClick={() => navigate("/dashboard")} className="bg-yellow-500" />
+        <Button text="Back to Dashboard" onClick={() => navigate("/admin-dashboard")} className="bg-yellow-500" />
         </>
         
       </div>
+
+      <input
+         type="text"
+         placeholder="Enter custom page name"
+         className="text-black w-full p-2 rounded mb-4"
+         value={customPageName}
+          onChange={(e) => setCustomPageName(e.target.value)}
+      />
       {Object.entries(selectedComponents).map(([key, value]) => {
         const quantity = value.quantity || 0;
 

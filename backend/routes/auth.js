@@ -6,6 +6,45 @@ require("dotenv").config();
 
 const router = express.Router();
 
+// Save Page Details Route
+router.post("/save-page-details", async (req, res) => {
+  const { PageName, StoragePath, CreatedByAdminID } = req.body;
+
+  if (!PageName || !StoragePath || !CreatedByAdminID) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Generate new PageID (example: Pg01, Pg02)
+    const countQuery = `SELECT COUNT(*) AS count FROM Pages`;
+    const countResult = await pool.request().query(countQuery);
+    const pageCount = countResult.recordset[0].count + 1;
+    const pageId = `Pg${pageCount.toString().padStart(2, "0")}`; // Pg01, Pg02, etc.
+
+    // Insert into Pages table
+    const insertQuery = `
+      INSERT INTO Pages (PageID, PageName, StoragePath, CreatedByAdminID)
+      VALUES (@PageID, @PageName, @StoragePath, @CreatedByAdminID)
+    `;
+
+    const insertRequest = pool.request();
+    insertRequest.input("PageID", sql.VarChar, pageId);
+    insertRequest.input("PageName", sql.NVarChar, PageName);
+    insertRequest.input("StoragePath", sql.NVarChar, StoragePath);
+    insertRequest.input("CreatedByAdminID", sql.VarChar, CreatedByAdminID);
+
+    await insertRequest.query(insertQuery);
+
+    res.status(201).json({ message: "Page details saved successfully", PageID: pageId });
+  } catch (err) {
+    console.error("❌ Page Details Save Error:", err);
+    res.status(500).json({ message: "Error saving page details", error: err.message });
+  }
+});
+
+
 // User Registration Route
 router.post("/register-user", async (req, res) => {
   const { firstName, lastName, mobileNum, email, password } = req.body;

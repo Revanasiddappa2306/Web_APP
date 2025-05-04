@@ -27,7 +27,7 @@ const ComponentSelector = () => {
     <div className="min-h-screen bg-cyan-300 text-white p-6">
       <div className="flex justify-between mb-6">
         <h1 className=" text-2xl font-bold text-black" >Select Components</h1>
-        <Button text="Back to Dashboard" onClick={() => navigate("/dashboard")} className="bg-yellow-500" />
+        <Button text="Back to Dashboard" onClick={() => navigate("/admin-dashboard")} className="bg-yellow-500" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
