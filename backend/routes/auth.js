@@ -45,6 +45,60 @@ router.post("/save-page-details", async (req, res) => {
 });
 
 
+router.post("/create-data-table", async (req, res) => {
+  const { pageName, pageId, fieldConfigs } = req.body;
+
+  if (!pageName || !pageId || !fieldConfigs) {
+    return res.status(400).json({ message: "PageName, PageID, and fieldConfigs are required" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    const dataTableName = `${pageName.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")}_Table`;
+
+    let columns = '';
+    Object.entries(fieldConfigs).forEach(([key, field], index) => {
+      const safeColumnName = field.label
+        ? field.label.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")
+        : `Field${index + 1}`;
+      
+      columns += `${safeColumnName} NVARCHAR(255),\n`;
+    });
+
+    columns = columns.slice(0, -2); // Remove trailing comma & newline
+
+    const createTableQuery = `
+      CREATE TABLE ${dataTableName} (
+        ID INT PRIMARY KEY IDENTITY(1,1),
+        ${columns},
+        DateTimeEntered DATETIME
+      );
+    `;
+
+    await pool.request().query(createTableQuery);
+
+    const insertQuery = `
+      INSERT INTO PageDataTables (PageID, DataTableName)
+      VALUES (@PageID, @DataTableName)
+    `;
+
+    const insertRequest = pool.request();
+    insertRequest.input("PageID", sql.VarChar, pageId);
+    insertRequest.input("DataTableName", sql.VarChar, dataTableName);
+
+    await insertRequest.query(insertQuery);
+
+    res.status(201).json({ message: "Data table created successfully", dataTableName });
+  } catch (err) {
+    console.error("❌ Error creating data table:", err);
+    res.status(500).json({ message: "Error creating data table", error: err.message });
+  }
+});
+
+
+
+
 // User Registration Route
 router.post("/register-user", async (req, res) => {
   const { firstName, lastName, mobileNum, email, password } = req.body;
@@ -260,5 +314,64 @@ router.post("/admin-login", async (req, res) => {
     res.status(500).json({ message: "Error logging in", error: err.message });
   }
 });
+
+
+// ///// Insert Data into Table Route
+// router.post("/insert-into-table", async (req, res) => {
+//   const { tableName, data } = req.body;
+
+//   if (!tableName || !data || typeof data !== 'object') {
+//     return res.status(400).json({ message: "Table name and data object are required" });
+//   }
+
+//   try {
+//     const pool = await poolPromise;
+
+//     const columns = Object.keys(data).map(col => `[${col}]`).join(", ");
+//     const values = Object.values(data).map(val => `'${val}'`).join(", ");
+
+//     const insertQuery = `INSERT INTO ${tableName} (${columns}, DateTimeEntered) VALUES (${values}, GETDATE())`;
+
+//     await pool.request().query(insertQuery);
+
+//     res.status(200).json({ message: "Data inserted successfully" });
+//   } catch (err) {
+//     console.error("❌ Error inserting data:", err);
+//     res.status(500).json({ message: "Error inserting data", error: err.message });
+//   }
+// });
+
+router.post("/insert-into-table", async (req, res) => {
+  const { tableName, data } = req.body;
+
+  if (!tableName || !data || typeof data !== 'object') {
+    return res.status(400).json({ message: "Table name and data object are required" });
+  }
+
+  try {
+    const pool = await poolPromise;
+
+    // Prepare column names and parameterized placeholders
+    const columns = Object.keys(data).map(col => `[${col}]`).join(", ");
+    const parameters = Object.keys(data).map((col, idx) => `@param${idx}`).join(", ");
+
+    // Start query with parameterized values
+    const insertQuery = `INSERT INTO [${tableName}] (${columns}, DateTimeEntered) VALUES (${parameters}, GETDATE())`;
+
+    const request = pool.request();
+    Object.values(data).forEach((val, idx) => {
+      request.input(`param${idx}`, val);
+    });
+
+    await request.query(insertQuery);
+
+    res.status(200).json({ message: "✅ Data inserted successfully" });
+  } catch (err) {
+    console.error("❌ Error inserting data:", err);
+    res.status(500).json({ message: "Error inserting data", error: err.message });
+  }
+});
+
+
 
 module.exports = router;

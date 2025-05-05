@@ -104,115 +104,135 @@ router.post("/generate-form", (req, res) => {
   });
 
 
-function generateComponentCode(fieldConfigs, pageName) {
-  let fields = Object.entries(fieldConfigs)
-    .map(([key, config]) => {
-      const label = config.label || "Field";
 
+  function generateComponentCode(fieldConfigs, pageName) {
+    let stateDeclarations = '';
+    let inputsCode = '';
+  
+    Object.entries(fieldConfigs).forEach(([key, config], index) => {
+      const label = config.label || `Field${index + 1}`;
+      const stateKey = `field_${index}`;
+      const safeLabel = label.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");
+  
+      stateDeclarations += `const [${stateKey}, set${stateKey}] = React.useState("");\n`;
+  
       if (key.startsWith("Dropdown")) {
         const options = (config.options || [])
           .map((opt) => `<option value="${opt}">${opt}</option>`)
           .join("\n");
-        return `
+        inputsCode += `
           <label>${label}</label>
-          <select className="p-2 border rounded mb-2">
+          <select className="p-2 border rounded mb-2" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)}>
+            <option value="">Select</option>
             ${options}
           </select>
         `;
-      }
-
-      if (key.startsWith("Checkbox")) {
-        return `
+      } else if (key.startsWith("Checkbox") || key.startsWith("Toggle Switch")) {
+        inputsCode += `
           <label className="inline-flex items-center mb-2">
-            <input type="checkbox" className="mr-2" />
+            <input type="checkbox" checked={${stateKey}} onChange={(e) => set${stateKey}(e.target.checked)} className="mr-2" />
             ${label} ${config.condition ? `(${config.condition})` : ""}
           </label>
         `;
-      }
-
-      if (key.startsWith("Radio Group")) {
-        return `
+      } else if (key.startsWith("Radio Group")) {
+        inputsCode += `
           <label>${label}</label>
           <div className="mb-2">
             <label className="mr-4">
-              <input type="radio" name="${key}" value="Option 1" className="mr-1" /> Option 1
+              <input type="radio" name="${safeLabel}" value="Option 1" checked={${stateKey} === "Option 1"} onChange={() => set${stateKey}("Option 1")} className="mr-1" /> Option 1
             </label>
             <label>
-              <input type="radio" name="${key}" value="Option 2" className="mr-1" /> Option 2
+              <input type="radio" name="${safeLabel}" value="Option 2" checked={${stateKey} === "Option 2"} onChange={() => set${stateKey}("Option 2")} className="mr-1" /> Option 2
             </label>
           </div>
         `;
-      }
-
-      if (key.startsWith("Date Picker")) {
-        return `
+      } else if (key.startsWith("Date Picker")) {
+        inputsCode += `
           <label>${label}</label>
-          <input type="date" className="p-2 border rounded mb-2" />
+          <input type="date" className="p-2 border rounded mb-2" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />
         `;
-      }
-
-      if (key.startsWith("Textarea")) {
-        return `
+      } else if (key.startsWith("Textarea")) {
+        inputsCode += `
           <label>${label}</label>
-          <textarea className="p-2 border rounded mb-2" rows="4" />
+          <textarea className="p-2 border rounded mb-2" rows="4" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />
         `;
-      }
-
-      if (key.startsWith("Number Input")) {
-        return `
+      } else if (key.startsWith("Number Input")) {
+        inputsCode += `
           <label>${label}</label>
-          <input type="number" className="p-2 border rounded mb-2" />
+          <input type="number" className="p-2 border rounded mb-2" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />
+        `;
+      } else if (key.startsWith("Button")) {
+        // Skip rendering internal buttons
+      } else {
+        // Default: text input
+        inputsCode += `
+          <label>${label}</label>
+          <input type="text" className="p-2 border rounded mb-2" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />
         `;
       }
+    });
+  
+  
 
-      if (key.startsWith("Toggle Switch")) {
-        return `
-          <label className="inline-flex items-center mb-2">
-            <input type="checkbox" className="mr-2" />
-            ${label} (Toggle)
-          </label>
-        `;
+    const dataObject = Object.entries(fieldConfigs)
+      .map(([_, config], index) => {
+       const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
+       const stateKey = `field_${index}`;
+       return `"${fieldName}": ${stateKey}`;
+     })
+   .join(",\n      ");
+
+  
+    return `import React from "react";
+  
+  const GeneratedForm = () => {
+    ${stateDeclarations}
+  
+    const handleSubmit = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/insert-into-table", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            tableName: "${pageName}_Table",
+            data: {
+              ${dataObject}
+            }
+          })
+        });
+  
+        const result = await response.json();
+        if (response.ok) {
+          alert("✅ Data inserted successfully");
+        } else {
+          alert("❌ Failed to insert data: " + result.message);
+        }
+      } catch (err) {
+        console.error("Error inserting data", err);
+        alert("❌ Unexpected error");
       }
-
-      if (key.startsWith("Button")) {
-        return `
-          <button type="button" className="bg-blue-500 text-white py-2 px-4 rounded mb-2">
-            ${label}
+    };
+  
+    return (
+      <div className="p-6 bg-white text-black min-h-screen">
+        <h1 className="text-2xl font-bold mb-6">${pageName.replace(/_/g, " ")}</h1>
+        <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+          ${inputsCode}
+  
+          <button type="button" onClick={handleSubmit} className="bg-blue-500 text-white py-2 px-4 rounded">
+            Enter
           </button>
-        `;
-      }
-
-      // Default fallback: text field
-      return `
-        <label>${label}</label>
-        <input type="text" className="p-2 border rounded mb-2" />
-      `;
-    })
-    .join("\n");
-
-  // Escape backticks or problematic quotes if needed
-  return `import React from "react";
-
-const GeneratedForm = () => {
-  return (
-    <div className="p-6 bg-white text-black min-h-screen">
-     <h1 className="text-2xl font-bold mb-6">${pageName.replace(/_/g, " ")}</h1>
-      <form className="flex flex-col gap-4">
-        ${fields}
-
-        <button type="button" className="bg-blue-500 text-white py-2 px-4 rounded">
-          Enter
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default GeneratedForm;
-`;
-}
-
-
-
+        </form>
+      </div>
+    );
+  };
+  
+  export default GeneratedForm;
+  `;
+  }
+  
+  
 module.exports = router;
 

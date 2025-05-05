@@ -3,17 +3,12 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button1"; 
 
-
-
-
-
 const ConfigureFields = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedComponents = location.state?.selectedComponents || {};
   const [fieldConfigs, setFieldConfigs] = useState({});
   const [customPageName, setCustomPageName] = useState("");
-  
   
   const handleChange = (key, field, value) => {
     setFieldConfigs((prev) => ({
@@ -29,7 +24,6 @@ const ConfigureFields = () => {
     navigate("/your-pages");
   };
 
-
   const handleFinish = async () => {
     if (!customPageName.trim()) {
       alert("Please enter a custom page name.");
@@ -39,7 +33,7 @@ const ConfigureFields = () => {
     const cleanPageName = customPageName.trim().replace(/\s+/g, "_");
     const payload = {
       pageName: cleanPageName,
-      fieldConfigs,
+      fieldConfigs,  // Maintain the field configurations as an object
     };
   
     try {
@@ -56,7 +50,7 @@ const ConfigureFields = () => {
         alert("✅ Page generated successfully!");
         console.log("Generated Page Info:", result);
   
-        // 👉 Save Page Details to Database
+        // Save Page Details to Database
         const saveDetails = await fetch("http://localhost:5000/api/auth/save-page-details", {
           method: "POST",
           headers: {
@@ -64,7 +58,7 @@ const ConfigureFields = () => {
           },
           body: JSON.stringify({
             PageName: customPageName,
-            StoragePath : `frontend\\src\\pages\\generated\\${result.fileName}`,// Assuming fileName is returned
+            StoragePath: `frontend\\src\\pages\\generated\\${result.fileName}`,
             CreatedByAdminID: "Ad01",
           }),
         });
@@ -74,8 +68,36 @@ const ConfigureFields = () => {
         if (!saveDetails.ok) {
           alert("⚠️ Page generated, but failed to save page info in DB.");
           console.error("DB Save Error:", saveResult.message);
+          return; // Stop further actions
         }
   
+        // ✅ Ask for confirmation before table creation
+        const confirmTable = window.confirm("🎉 Do you want to create a data table for this page now?");
+        if (confirmTable) {
+          const createTableResponse = await fetch("http://localhost:5000/api/auth/create-data-table", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              pageName: customPageName,
+              pageId: saveResult.PageID, // assuming your backend returns this
+              fieldConfigs,
+            }),
+          });
+  
+          const tableResult = await createTableResponse.json();
+  
+          if (createTableResponse.ok) {
+            alert("✅ Data table created successfully!");
+            console.log("Data Table Info:", tableResult);
+          } else {
+            alert("⚠️ Failed to create data table.");
+            console.error("Table Creation Error:", tableResult.message);
+          }
+        }
+  
+        // Navigate to the generated page regardless
         navigate(`/generated/${result.fileName.replace(".js", "")}`);
       } else {
         alert("❌ Failed to generate the page.");
@@ -85,27 +107,25 @@ const ConfigureFields = () => {
       alert("Error occurred while generating and saving the page.");
     }
   };
-  
-  
+
   return (
     <div className="p-6 text-white bg-cyan-300 min-h-screen">
-      
       <div className="flex justify-between mb-6">
         <h1 className="text-2xl font-bold mb-4 text-black">Configure Fields</h1>
         <>
-        <Button text="Your Pages" onClick={handleYourPagesClick} className="bg-green-500" />
-        <Button text="Back to Dashboard" onClick={() => navigate("/admin-dashboard")} className="bg-yellow-500" />
+          <Button text="Your Pages" onClick={handleYourPagesClick} className="bg-green-500" />
+          <Button text="Back to Dashboard" onClick={() => navigate("/admin-dashboard")} className="bg-yellow-500" />
         </>
-        
       </div>
 
       <input
-         type="text"
-         placeholder="Enter custom page name"
-         className="text-black w-full p-2 rounded mb-4"
-         value={customPageName}
-          onChange={(e) => setCustomPageName(e.target.value)}
+        type="text"
+        placeholder="Enter custom page name"
+        className="text-black w-full p-2 rounded mb-4"
+        value={customPageName}
+        onChange={(e) => setCustomPageName(e.target.value)}
       />
+
       {Object.entries(selectedComponents).map(([key, value]) => {
         const quantity = value.quantity || 0;
 
@@ -157,7 +177,6 @@ const ConfigureFields = () => {
               />
             )}
           </div>
-           
         ));
       })}
 
@@ -170,15 +189,7 @@ const ConfigureFields = () => {
 
       <button onClick={() => navigate("/component-selector")} className="bg-yellow-500 py-2 px-6 rounded mt-4 text-sm ml-4"> Back to Component Selector</button>
     </div>
-
   );
 };
 
 export default ConfigureFields;
-
-
-
-
-
-
-
