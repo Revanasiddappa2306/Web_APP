@@ -48,43 +48,69 @@ router.post("/generate-form", (req, res) => {
   router.post("/delete-pages", async (req, res) => {
     const { pages } = req.body;
   
-    if (!Array.isArray(pages)) {
-      return res.status(400).json({ message: "Pages must be an array" });
+    if (!Array.isArray(pages) || pages.length === 0) {
+      return res.status(400).json({ message: "Pages must be a non-empty array" });
     }
   
     const generatedDir = path.join(__dirname, "../../frontend/src/pages/generated");
   
-    // Delete files
-    pages.forEach((page) => {
-      const filePath = path.join(generatedDir, `${page}.js`);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log(`✅ Deleted file: ${filePath}`);
-      }
-    });
-  
     try {
-      // Build SQL placeholders dynamically
-      const placeholders = pages.map((_, i) => `@page${i}`).join(", ");
-      const request = db.request();
+      const pool = await poolPromise;
+      const request = pool.request();
   
-      pages.forEach((page, i) => {
-        request.input(`page${i}`, db.sql.VarChar, page);
+      // Step 1: Get PageIDs and PageNames from Pages table
+      const placeholders = pages.map((_, i) => `@name${i}`).join(", ");
+      pages.forEach((name, i) => {
+        request.input(`name${i}`, sql.VarChar, name);
       });
   
-      await request.query(
-        `DELETE FROM Pages WHERE PageName IN (${placeholders})`
-      );
+      const result = await request.query(`
+        SELECT PageID, PageName FROM Pages
+        WHERE PageName IN (${placeholders})
+      `);
   
-      res.json({ message: "Selected pages deleted successfully" });
+      const pageInfos = result.recordset;
+  
+      // Step 2: Delete from PageDataTables and drop corresponding PageName_table
+      for (const page of pageInfos) {
+        const { PageID, PageName } = page;
+  
+        // Delete related entries from PageDataTables
+        await pool.request()
+          .input("PageID", sql.VarChar, PageID)
+          .query(`DELETE FROM PageDataTables WHERE PageID = @PageID`);
+  
+        // Drop the dynamic page table (e.g., Siddu2306_table)
+        const tableName = `[${PageName}_table]`;
+        await pool.request().query(`IF OBJECT_ID('${tableName}', 'U') IS NOT NULL DROP TABLE ${tableName}`);
+      }
+  
+      // Step 3: Delete from Pages table
+      const delRequest = pool.request();
+      pages.forEach((name, i) => {
+        delRequest.input(`name${i}`, sql.VarChar, name);
+      });
+      await delRequest.query(`
+        DELETE FROM Pages WHERE PageName IN (${placeholders})
+      `);
+  
+      // Step 4: Delete JS files from frontend
+      pages.forEach((page) => {
+        const filePath = path.join(generatedDir, `${page}.js`);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log(`✅ Deleted file: ${filePath}`);
+        }
+      });
+  
+      res.status(200).json({ message: "Pages and related data deleted successfully" });
     } catch (err) {
-      console.error("❌ Error deleting from DB:", err);
-      res.status(500).json({ message: "Error deleting pages from database" });
+      console.error("❌ Error deleting pages:", err);
+      res.status(500).json({ message: "Error deleting pages", error: err.message });
     }
   });
-
-
-
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   function generateComponentCode(fieldConfigs, pageName) {
     let stateDeclarations = '';
     let inputsCode = '';
@@ -126,7 +152,7 @@ router.post("/generate-form", (req, res) => {
             </label>
           </div>
         `;
-      } else if (key.startsWith("Date Picker")) {
+      } else if (key === "Date") {
         inputsCode += `
           <label>${label}</label>
           <input type="date" className="p-2 border rounded mb-2" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />
@@ -136,7 +162,7 @@ router.post("/generate-form", (req, res) => {
           <label>${label}</label>
           <textarea className="p-2 border rounded mb-2" rows="4" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />
         `;
-      } else if (key.startsWith("Number Input")) {
+      } else if (key === "Number") {
         inputsCode += `
           <label>${label}</label>
           <input type="number" className="p-2 border rounded mb-2" value={${stateKey}} onChange={(e) => set${stateKey}(e.target.value)} />

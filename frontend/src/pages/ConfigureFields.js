@@ -133,57 +133,89 @@ const ConfigureFields = () => {
 
         {/* Render field configs */}
         {Object.entries(selectedComponents).map(([key, value]) => {
-          const quantity = value.quantity || 0;
-          return Array.from({ length: quantity }, (_, index) => (
-            <div key={`${key}-${index}`} className="bg-white p-4 rounded-lg shadow mb-6">
-              <h2 className="text-lg font-semibold mb-3">
-                {key} {quantity > 1 ? `#${index + 1}` : ""}
-              </h2>
+        const quantity = value.quantity || 0;
+        return Array.from({ length: quantity }, (_, index) => (
+          <div key={`${key}-${index}`} className="bg-white p-4 rounded-lg shadow mb-6">
+            <h2 className="text-lg font-semibold mb-3">
+              {key} {quantity > 1 ? `#${index + 1}` : ""}
+            </h2>
 
-              {/* Label input */}
+            {/* Label input */}
+            <input
+              type="text"
+              placeholder="Field Label"
+              className="text-black w-full p-2 rounded mb-3 border"
+              onChange={(e) =>
+                handleChange(`${key}-${index}`, "label", e.target.value)
+              }
+            />
+
+            {/* Dropdown options */}
+            {key === "Dropdown" && (
               <input
                 type="text"
-                placeholder="Field Label"
+                placeholder="Comma separated options (e.g. One,Two,Three)"
                 className="text-black w-full p-2 rounded mb-3 border"
                 onChange={(e) =>
-                  handleChange(`${key}-${index}`, "label", e.target.value)
+                  handleChange(
+                    `${key}-${index}`,
+                    "options",
+                    e.target.value.split(",").map((opt) => opt.trim())
+                  )
                 }
               />
+            )}
 
-              {/* Dropdown options */}
-              {key === "Dropdown" && (
+            {/* Checkbox condition */}
+            {key === "Checkbox" && (
+              <input
+                type="text"
+                placeholder="Checkbox condition (e.g. must be ticked)"
+                className="text-black w-full p-2 rounded mb-3 border"
+                onChange={(e) =>
+                  handleChange(`${key}-${index}`, "condition", e.target.value)
+                }
+              />
+            )}
+
+            {/* Number-specific attributes */}
+            {key === "Number" && (
+              <>
                 <input
-                  type="text"
-                  placeholder="Comma separated options (e.g. One,Two,Three)"
+                  type="number"
+                  placeholder="Min value (optional)"
                   className="text-black w-full p-2 rounded mb-3 border"
                   onChange={(e) =>
-                    handleChange(
-                      `${key}-${index}`,
-                      "options",
-                      e.target.value.split(",").map((opt) => opt.trim())
-                    )
+                    handleChange(`${key}-${index}`, "min", e.target.value)
                   }
                 />
-              )}
-
-              {/* Checkbox condition */}
-              {key === "Checkbox" && (
                 <input
-                  type="text"
-                  placeholder="Checkbox condition (e.g. must be ticked)"
+                  type="number"
+                  placeholder="Max value (optional)"
                   className="text-black w-full p-2 rounded mb-3 border"
                   onChange={(e) =>
-                    handleChange(
-                      `${key}-${index}`,
-                      "condition",
-                      e.target.value
-                    )
+                    handleChange(`${key}-${index}`, "max", e.target.value)
                   }
                 />
-              )}
-            </div>
-          ));
-        })}
+              </>
+            )}
+
+            {/* Date-specific attributes */}
+            {key === "Date" && (
+              <>
+                <input
+                  type="date"
+                  placeholder="Default Date (optional)"
+                  className="text-black w-full p-2 rounded mb-3 border"
+                  onChange={(e) =>
+                    handleChange(`${key}-${index}`, "defaultDate", e.target.value)
+                  }
+                />
+              </>
+            )}
+          </div>
+        ));
+      })}
 
         {/* Action Buttons */}
         <div className="flex gap-4">
