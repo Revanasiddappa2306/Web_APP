@@ -1,6 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+
 
 const YourPages = () => {
   const [pages, setPages] = useState([]);
@@ -53,55 +54,92 @@ const YourPages = () => {
   };
 
   return (
-    <div className="p-6 bg-white min-h-screen text-black relative">
-      {/* Back button */}
-      <button
-        onClick={() => navigate("/admin-dashboard")}
-        className="absolute top-6 right-6 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
-      >
-        Back to Dashboard
-      </button>
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Navbar */}
+      <header className="bg-alconBlue text-white p-4 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/admin-dashboard")}>
+            {/* <img src={AlconLogo} alt="Alcon Logo" className="h-10 w-10 rounded-full" /> */}
+            <span className="text-2xl font-bold">Alcon</span>
+          </div>
 
-      <h1 className="text-2xl font-bold mb-4">Your Generated Pages</h1>
+          <nav className="flex gap-6 text-lg">
+            <button onClick={() => navigate("/admin-dashboard")}  className="hover:text-yellow-300" > Home </button>
+            <button className="hover:text-yellow-300">About</button>
+            <button className="hover:text-yellow-300">Contact</button>
+          </nav>
+        </div>
+      </header>
 
-      {pages.length === 0 ? (
-        <p>No pages found.</p>
-      ) : (
-        <>
-          <button
-            onClick={handleDeleteSelected}
-            className={`mb-4 px-4 py-2 rounded ${
-              selectedPages.length > 0
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-gray-400 text-white cursor-not-allowed"
-            }`}
-            disabled={selectedPages.length === 0}
-          >
-            Delete Selected
-          </button>
+      {/* Main Content */}
+      <main className="flex-1 p-6 bg-white">
+        <h1 className="text-2xl font-bold mb-4">Your Generated Pages</h1>
 
-          <ul className="space-y-2">
-            {pages.map((page) => (
-              <li key={page} className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={selectedPages.includes(page)}
-                  onChange={() => togglePage(page)}
-                />
-                <span
-                  onClick={() => navigate(`/generated/${page}`)}
-                  className="cursor-pointer text-blue-600 hover:underline"
+        {pages.length === 0 ? (
+          <p>No pages found.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pages.map((page) => (
+                <div
+                  key={page}
+                  className={`p-4 bg-white border rounded-lg shadow-md hover:shadow-lg transition cursor-pointer ${
+                    selectedPages.includes(page) ? "border-blue-500" : ""
+                  }`}
+                  onClick={() => togglePage(page)}
                 >
-                  {page}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+                  {/* Page Preview */}
+                  <div className="w-full h-64 bg-gray-200 mb-4 flex justify-center items-center">
+                    <iframe  src={`/generated/${page}`} title={page} className="w-4/5 h-4/5 border border-gray-300 rounded" > </iframe>
+                  </div>
+
+                  {/* Page Name */}
+                  <div className="text-center mb-2">
+                    <span
+                      onClick={() => navigate(`/generated/${page}`)}
+                      className="text-xl font-semibold text-blue-600 hover:underline"
+                    >
+                      {page}
+                    </span>
+                  </div>
+
+                  {/* Checkbox to select */}
+                  <div className="flex justify-center items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedPages.includes(page)}
+                      onChange={() => togglePage(page)}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Delete Selected Button */}
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleDeleteSelected}
+                className={`px-6 py-3 rounded-lg text-white ${
+                  selectedPages.length > 0
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+                disabled={selectedPages.length === 0}
+              >
+                Delete Selected Pages
+              </button>
+            </div>
+          </>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-alconBlue text-white text-center p-4">
+        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
 
 export default YourPages;
-

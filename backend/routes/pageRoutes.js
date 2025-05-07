@@ -6,7 +6,7 @@ const router = express.Router();
 const { poolPromise, sql } = require("../config/db");
 require("dotenv").config();
 
-
+/////////////// Generate Form route ///////////////////////////////////////////////////////////////////////////////////////////////////////
 router.post("/generate-form", (req, res) => {
   const { pageName, fieldConfigs } = req.body;
 
@@ -29,6 +29,7 @@ router.post("/generate-form", (req, res) => {
   });
 });
 
+/////////////////////// list pages route ///////////////////////////////////////////////////////////////////////////////////////////////////////
   router.get("/list-pages", (req, res) => {
     const generatedDir = path.join(__dirname, "../../frontend/src/pages/generated");
   
@@ -43,28 +44,7 @@ router.post("/generate-form", (req, res) => {
     });
   });
 
-
-  // router.post("/delete-pages", (req, res) => {
-  //   const { pages } = req.body;
-  //   if (!Array.isArray(pages)) {
-  //     return res.status(400).json({ message: "Pages must be an array" });
-  //   }
-  
-  //   const generatedDir = path.join(__dirname, "../../frontend/src/pages/generated");
-  
-  //   pages.forEach((page) => {
-  //     const filePath = path.join(generatedDir, `${page}.js`);
-  //     if (fs.existsSync(filePath)) {
-  //       fs.unlinkSync(filePath);
-  //     }
-  //   });
-  
-  //   res.json({ message: "Selected pages deleted successfully" });
-  // });
-
-
-
-
+  ///////// Delete Pages ///////////////////////////////////////////////////////////////////////////////////////////////////////
   router.post("/delete-pages", async (req, res) => {
     const { pages } = req.body;
   

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Button from "../components/Button1"; 
+import { useLocation, useNavigate } from "react-router-dom";
+// import Button from "../components/Button1";
 
 const ConfigureFields = () => {
   const location = useLocation();
@@ -9,7 +8,7 @@ const ConfigureFields = () => {
   const selectedComponents = location.state?.selectedComponents || {};
   const [fieldConfigs, setFieldConfigs] = useState({});
   const [customPageName, setCustomPageName] = useState("");
-  
+
   const handleChange = (key, field, value) => {
     setFieldConfigs((prev) => ({
       ...prev,
@@ -20,22 +19,18 @@ const ConfigureFields = () => {
     }));
   };
 
-  const handleYourPagesClick = () => {
-    navigate("/your-pages");
-  };
-
   const handleFinish = async () => {
     if (!customPageName.trim()) {
       alert("Please enter a custom page name.");
       return;
     }
-  
+
     const cleanPageName = customPageName.trim().replace(/\s+/g, "_");
     const payload = {
       pageName: cleanPageName,
-      fieldConfigs,  // Maintain the field configurations as an object
+      fieldConfigs,
     };
-  
+
     try {
       const response = await fetch("http://localhost:5000/api/pages/generate-form", {
         method: "POST",
@@ -44,13 +39,11 @@ const ConfigureFields = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (response.ok) {
         const result = await response.json();
         alert("✅ Page generated successfully!");
-        console.log("Generated Page Info:", result);
-  
-        // Save Page Details to Database
+
         const saveDetails = await fetch("http://localhost:5000/api/auth/save-page-details", {
           method: "POST",
           headers: {
@@ -62,16 +55,15 @@ const ConfigureFields = () => {
             CreatedByAdminID: "Ad01",
           }),
         });
-  
+
         const saveResult = await saveDetails.json();
-  
+
         if (!saveDetails.ok) {
           alert("⚠️ Page generated, but failed to save page info in DB.");
           console.error("DB Save Error:", saveResult.message);
-          return; // Stop further actions
+          return;
         }
-  
-        // ✅ Ask for confirmation before table creation
+
         const confirmTable = window.confirm("🎉 Do you want to create a data table for this page now?");
         if (confirmTable) {
           const createTableResponse = await fetch("http://localhost:5000/api/auth/create-data-table", {
@@ -81,23 +73,21 @@ const ConfigureFields = () => {
             },
             body: JSON.stringify({
               pageName: customPageName,
-              pageId: saveResult.PageID, // assuming your backend returns this
+              pageId: saveResult.PageID,
               fieldConfigs,
             }),
           });
-  
+
           const tableResult = await createTableResponse.json();
-  
+
           if (createTableResponse.ok) {
             alert("✅ Data table created successfully!");
-            console.log("Data Table Info:", tableResult);
           } else {
             alert("⚠️ Failed to create data table.");
             console.error("Table Creation Error:", tableResult.message);
           }
         }
-  
-        // Navigate to the generated page regardless
+
         navigate(`/generated/${result.fileName.replace(".js", "")}`);
       } else {
         alert("❌ Failed to generate the page.");
@@ -109,85 +99,113 @@ const ConfigureFields = () => {
   };
 
   return (
-    <div className="p-6 text-white bg-cyan-300 min-h-screen">
-      <div className="flex justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-4 text-black">Configure Fields</h1>
-        <>
-          <Button text="Your Pages" onClick={handleYourPagesClick} className="bg-green-500" />
-          <Button text="Back to Dashboard" onClick={() => navigate("/admin-dashboard")} className="bg-yellow-500" />
-        </>
-      </div>
+    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900">
+      {/* Navbar */}
+      <header className="bg-blue-900 text-white p-4 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1
+            className="text-3xl font-bold cursor-pointer"
+            onClick={() => navigate("/admin-dashboard")}
+          >
+            Alcon
+          </h1>
+          <nav className="flex items-center gap-8 text-lg font-medium">
+            <button onClick={() => navigate("/admin-dashboard")} className="hover:text-yellow-300">Home</button>
+            <button onClick={() => navigate("/your-pages")} className="hover:text-yellow-300">Pages</button>
+            <button className="hover:text-yellow-300">About</button>
+            <button className="hover:text-yellow-300">Contact</button>
+          </nav>
+        </div>
+      </header>
 
-      <input
-        type="text"
-        placeholder="Enter custom page name"
-        className="text-black w-full p-2 rounded mb-4"
-        value={customPageName}
-        onChange={(e) => setCustomPageName(e.target.value)}
-      />
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        <h1 className="text-2xl font-bold mb-6 text-center">Configure Fields</h1>
 
-      {Object.entries(selectedComponents).map(([key, value]) => {
-        const quantity = value.quantity || 0;
+        {/* Page name input */}
+        <input
+          type="text"
+          placeholder="Enter custom page name"
+          className="text-black w-full p-3 rounded mb-6 border"
+          value={customPageName}
+          onChange={(e) => setCustomPageName(e.target.value)}
+        />
 
-        return Array.from({ length: quantity }, (_, index) => (
-          <div key={`${key}-${index}`} className="bg-cyan-400 p-4 rounded-lg mb-4">
-            <h2 className="text-lg font-semibold mb-2">
-              {key} {quantity > 1 ? `#${index + 1}` : ""}
-            </h2>
+        {/* Render field configs */}
+        {Object.entries(selectedComponents).map(([key, value]) => {
+          const quantity = value.quantity || 0;
+          return Array.from({ length: quantity }, (_, index) => (
+            <div key={`${key}-${index}`} className="bg-white p-4 rounded-lg shadow mb-6">
+              <h2 className="text-lg font-semibold mb-3">
+                {key} {quantity > 1 ? `#${index + 1}` : ""}
+              </h2>
 
-            {/* Field label */}
-            <input
-              type="text"
-              placeholder="Field Label"
-              className="text-black w-full p-2 rounded mb-2"
-              onChange={(e) =>
-                handleChange(`${key}-${index}`, "label", e.target.value)
-              }
-            />
-
-            {/* Dropdown Options (if Dropdown) */}
-            {key === "Dropdown" && (
+              {/* Label input */}
               <input
                 type="text"
-                placeholder="Comma separated options (e.g. One,Two,Three)"
-                className="text-black w-full p-2 rounded mb-2"
+                placeholder="Field Label"
+                className="text-black w-full p-2 rounded mb-3 border"
                 onChange={(e) =>
-                  handleChange(
-                    `${key}-${index}`,
-                    "options",
-                    e.target.value.split(",").map((opt) => opt.trim())
-                  )
+                  handleChange(`${key}-${index}`, "label", e.target.value)
                 }
               />
-            )}
 
-            {/* Checkbox condition (if Checkbox) */}
-            {key === "Checkbox" && (
-              <input
-                type="text"
-                placeholder="Checkbox condition (e.g. must be ticked)"
-                className="text-black w-full p-2 rounded mb-2"
-                onChange={(e) =>
-                  handleChange(
-                    `${key}-${index}`,
-                    "condition",
-                    e.target.value
-                  )
-                }
-              />
-            )}
-          </div>
-        ));
-      })}
+              {/* Dropdown options */}
+              {key === "Dropdown" && (
+                <input
+                  type="text"
+                  placeholder="Comma separated options (e.g. One,Two,Three)"
+                  className="text-black w-full p-2 rounded mb-3 border"
+                  onChange={(e) =>
+                    handleChange(
+                      `${key}-${index}`,
+                      "options",
+                      e.target.value.split(",").map((opt) => opt.trim())
+                    )
+                  }
+                />
+              )}
 
-      <button
-        onClick={handleFinish}
-        className="bg-green-500 py-2 px-6 rounded mt-4 text-sm"
-      >
-        Submit Config
-      </button>
+              {/* Checkbox condition */}
+              {key === "Checkbox" && (
+                <input
+                  type="text"
+                  placeholder="Checkbox condition (e.g. must be ticked)"
+                  className="text-black w-full p-2 rounded mb-3 border"
+                  onChange={(e) =>
+                    handleChange(
+                      `${key}-${index}`,
+                      "condition",
+                      e.target.value
+                    )
+                  }
+                />
+              )}
+            </div>
+          ));
+        })}
 
-      <button onClick={() => navigate("/component-selector")} className="bg-yellow-500 py-2 px-6 rounded mt-4 text-sm ml-4"> Back to Component Selector</button>
+        {/* Action Buttons */}
+        <div className="flex gap-4">
+          <button
+            onClick={handleFinish}
+            className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded text-sm"
+          >
+            Submit Config
+          </button>
+          <button
+            onClick={() => navigate("/component-selector")}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded text-sm"
+          >
+            Back to Component Selector
+          </button>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">
+        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
