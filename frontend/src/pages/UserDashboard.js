@@ -13,6 +13,12 @@ const UserDashboard = () => {
     toast.info("Not assigned any pages😒!", { autoClose: 1500 });
 
   };
+  const handleAboutClick = () => {
+    navigate("/about");
+  };
+  const handleContactClick = () => {
+    navigate("/contact");
+  };
 
 
   const handleLogout = () => {
@@ -35,6 +41,8 @@ const UserDashboard = () => {
             <>
               
               <Button text="Assigned Pages" onClick={handleYourPagesClick} className="bg-green-500" />
+              <button onClick={handleAboutClick} className="hover:text-yellow-300"> About </button>
+              <button onClick={handleContactClick} className="hover:text-yellow-300"> Contact </button>
               <Button text="Logout" onClick={handleLogout} className="bg-red-500" />
             </>
         

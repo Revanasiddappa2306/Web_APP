@@ -3,9 +3,13 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { componentsLibrary } from "../components/componentsLibrary";
 import Button from "../components/Button1";
+import AboutPopup from "../components/AboutPopup";
+import ContactPopup from "../components/ContactPopup";  
 
 const ComponentSelector = () => {
   const navigate = useNavigate();
+  const [showAbout, setShowAbout] = useState(false);
+  const [showContact, setShowContact] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState({});
 
   const handleQuantityChange = (componentName, quantity) => {
@@ -26,6 +30,7 @@ const ComponentSelector = () => {
     navigate("/admin-dashboard");
   };
 
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
@@ -45,8 +50,8 @@ const ComponentSelector = () => {
               Home
             </button>
             <button onClick={() => navigate("/your-pages")} className="hover:text-yellow-300">Pages</button>
-            <button className="hover:text-yellow-300">About</button>
-            <button className="hover:text-yellow-300">Contact</button>
+            <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
+            <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>
         </div>
       </header>
@@ -93,6 +98,10 @@ const ComponentSelector = () => {
           />
         </div>
       </main>
+
+      {/* Modal */}
+      {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
+      {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">

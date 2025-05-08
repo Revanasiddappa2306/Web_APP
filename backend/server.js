@@ -23,6 +23,7 @@ app.get("/api/test", async (req, res) => {
 app.use(express.json()); // 🔴 Fix: Allows JSON body parsing
 app.use("/api/auth", require("./routes/auth")); // For users
 app.use("/api/pages", require("./routes/pageRoutes")); // Page routes
+app.use("/api/tables", require("./routes/tables")); // Table routes
 
 // start the server
 app.listen(PORT, () => {

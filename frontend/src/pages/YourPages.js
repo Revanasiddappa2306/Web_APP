@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AboutPopup from "../components/AboutPopup";
+import ContactPopup from "../components/ContactPopup";
 
 
 
@@ -7,6 +9,8 @@ const YourPages = () => {
   const [pages, setPages] = useState([]);
   const [selectedPages, setSelectedPages] = useState([]);
   const navigate = useNavigate();
+  const [showAbout, setShowAbout] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
     fetchPages();
@@ -65,8 +69,8 @@ const YourPages = () => {
 
           <nav className="flex gap-6 text-lg">
             <button onClick={() => navigate("/admin-dashboard")}  className="hover:text-yellow-300" > Home </button>
-            <button className="hover:text-yellow-300">About</button>
-            <button className="hover:text-yellow-300">Contact</button>
+            <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
+            <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>
         </div>
       </header>
@@ -133,6 +137,9 @@ const YourPages = () => {
           </>
         )}
       </main>
+      { /* About and Contact Popups */}
+      {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
+      {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center p-4">

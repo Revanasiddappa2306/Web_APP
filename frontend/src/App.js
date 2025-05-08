@@ -11,11 +11,6 @@ import YourPages from "./pages/YourPages";
 import Home from "./pages/Home";
 import DynamicGeneratedPageLoader from "./components/DynamicGeneratedPageLoader";
 
-
-
-
-
-
 export default function App() {
   return (
     <Router>
@@ -33,6 +28,7 @@ export default function App() {
         <Route path="/configure-fields" element={<ConfigureFields />} />
         <Route path="/your-pages" element={<YourPages />} />
         <Route path="/generated/:pageName" element={<DynamicGeneratedPageLoader />} />
+        
         
       </Routes>
     </Router>

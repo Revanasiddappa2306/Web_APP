@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // import Button from "../components/Button1";
+import AboutPopup from "../components/AboutPopup";
+import ContactPopup from "../components/ContactPopup";
 
 const ConfigureFields = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [showAbout, setShowAbout] = useState(false);
+  const [showContact, setShowContact] = useState(false);
   const selectedComponents = location.state?.selectedComponents || {};
   const [fieldConfigs, setFieldConfigs] = useState({});
   const [customPageName, setCustomPageName] = useState("");
@@ -112,8 +116,8 @@ const ConfigureFields = () => {
           <nav className="flex items-center gap-8 text-lg font-medium">
             <button onClick={() => navigate("/admin-dashboard")} className="hover:text-yellow-300">Home</button>
             <button onClick={() => navigate("/your-pages")} className="hover:text-yellow-300">Pages</button>
-            <button className="hover:text-yellow-300">About</button>
-            <button className="hover:text-yellow-300">Contact</button>
+            <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
+            <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>
         </div>
       </header>
@@ -233,6 +237,10 @@ const ConfigureFields = () => {
           </button>
         </div>
       </main>
+
+      {/* Modal */}
+      {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
+      {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">

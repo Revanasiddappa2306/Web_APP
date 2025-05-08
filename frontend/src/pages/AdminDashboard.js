@@ -1,9 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AboutPopup from "../components/AboutPopup";
+
+
+
+import ContactPopup from "../components/ContactPopup";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [showAbout, setShowAbout] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+  
 
   const handleYourPagesClick = () => {
     navigate("/your-pages");
@@ -29,35 +38,28 @@ const AdminDashboard = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold">Alcon</h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
-  {/* Actions Dropdown */}
-  <div className="relative group">
-    <button className="hover:text-yellow-300">Actions</button>
-    <div className="absolute top-full left-0 mt-2 w-40 bg-white text-black shadow-lg rounded-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transform scale-95 group-hover:scale-100 transition-all duration-200 z-10">
-      <button
-        onClick={handleCreatePage}
-        className="px-4 py-2 hover:bg-gray-100 text-left w-full"
-      >
-        Create Page
-      </button>
-      <button
-        onClick={handleYourPagesClick}
-        className="px-4 py-2 hover:bg-gray-100 text-left w-full"
-      >
-        Pages Created
-      </button>
-    </div>
-  </div>
-
-  {/* Static Links */}
-  <button className="hover:text-yellow-300">About</button>
-  <button className="hover:text-yellow-300">Contact</button>
-  <button
-    onClick={handleLogout}
-    className="hover:text-yellow-300"
-  >
-    Logout
-  </button>
-</nav>
+                {/* Actions Dropdown */}
+                <div className="relative group">
+                  <button className="hover:text-yellow-300">Actions</button>
+                  <div className="absolute top-full left-0 mt-2 w-40 bg-white text-black shadow-lg rounded-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transform scale-95 group-hover:scale-100 transition-all duration-200 z-10">
+                    <button
+                      onClick={handleCreatePage}
+                      className="px-4 py-2 hover:bg-gray-100 text-left w-full"
+                    >
+                      Create Page
+                    </button>
+                    <button
+                      onClick={handleYourPagesClick}
+                      className="px-4 py-2 hover:bg-gray-100 text-left w-full"
+                    >
+                      Pages Created
+                    </button>
+                  </div>
+                </div>
+                      <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
+                      <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
+                      <button onClick={handleLogout} className="hover:text-yellow-300">  Logout</button>
+            </nav>
 
         </div>
       </header>
@@ -71,6 +73,10 @@ const AdminDashboard = () => {
           Select "Create Page" to begin new page creation or see your pages
         </h3>
       </main>
+
+       {/* Modal */}
+       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
+       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center p-4 mt-auto shadow-inner">
