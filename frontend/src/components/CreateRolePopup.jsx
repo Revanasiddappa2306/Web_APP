@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const CreateRolePopup = ({ onClose, onRoleCreated }) => {
   const [roleName, setRoleName] = useState("");
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!roleName.trim()) return;

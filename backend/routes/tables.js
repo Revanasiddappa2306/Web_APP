@@ -163,22 +163,4 @@ router.post("/insert-into-table", async (req, res) => {
 });
 
 
-
-// backend/routes/roles.js
-router.get("/get-roles", async (req, res) => {
-  try {
-    const pool = await sql.connect(dbConfig);
-    const result = await pool.request().query("SELECT RoleID, Name FROM Alc_WebFramework.dbo.Roles");
-    res.json(result.recordset);
-  } catch (err) {
-    console.error("❌ Error fetching roles:", err);
-    res.status(500).json({ message: "Failed to fetch roles" });
-  }
-});
-
-
-
-
-
-
 module.exports = router;
