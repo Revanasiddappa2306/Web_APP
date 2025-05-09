@@ -14,6 +14,7 @@ router.post("/save-page-details", async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
+
   try {
     const pool = await poolPromise;
 
@@ -59,14 +60,6 @@ router.post("/create-data-table", async (req, res) => {
     const dataTableName = `${pageName.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")}_Table`;
 
     let columns = '';
-    // Object.entries(fieldConfigs).forEach(([key, field], index) => {
-    //   const safeColumnName = field.label
-    //     ? field.label.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")
-    //     : `Field${index + 1}`;
-      
-    //   columns += `${safeColumnName} NVARCHAR(255),\n`;
-    // });
-
 
     Object.entries(fieldConfigs).forEach(([key, field], index) => {
       const safeColumnName = field.label
@@ -129,7 +122,7 @@ router.post("/create-data-table", async (req, res) => {
 });
 
 
-
+////////////////////////// insert into table route ///////////////////////
 router.post("/insert-into-table", async (req, res) => {
   const { tableName, data } = req.body;
 
@@ -171,16 +164,18 @@ router.post("/insert-into-table", async (req, res) => {
 
 
 
-router.get("/roles", async (req, res) => {
+// backend/routes/roles.js
+router.get("/get-roles", async (req, res) => {
   try {
-    const request = new sql.Request();
-    const result = await request.query("SELECT TOP (1000) [RoleID], [Name] FROM [Alc_WebFramework].[dbo].[Roles]");
+    const pool = await sql.connect(dbConfig);
+    const result = await pool.request().query("SELECT RoleID, Name FROM Alc_WebFramework.dbo.Roles");
     res.json(result.recordset);
-  } catch (error) {
-    console.error("Error fetching roles:", error);
-    res.status(500).json({ error: "Failed to fetch roles" });
+  } catch (err) {
+    console.error("❌ Error fetching roles:", err);
+    res.status(500).json({ message: "Failed to fetch roles" });
   }
 });
+
 
 
 

@@ -48,7 +48,7 @@ const ConfigureFields = () => {
         const result = await response.json();
         alert("✅ Page generated successfully!");
 
-        const saveDetails = await fetch("http://localhost:5000/api/auth/save-page-details", {
+        const saveDetails = await fetch("http://localhost:5000/api/tables/save-page-details", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -70,7 +70,7 @@ const ConfigureFields = () => {
 
         const confirmTable = window.confirm("🎉 Do you want to create a data table for this page now?");
         if (confirmTable) {
-          const createTableResponse = await fetch("http://localhost:5000/api/auth/create-data-table", {
+          const createTableResponse = await fetch("http://localhost:5000/api/tables/create-data-table", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

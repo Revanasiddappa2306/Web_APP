@@ -196,7 +196,7 @@ router.post("/generate-form", (req, res) => {
   
     const handleSubmit = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/auth/insert-into-table", {
+        const response = await fetch("http://localhost:5000/api/tables/insert-into-table", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
