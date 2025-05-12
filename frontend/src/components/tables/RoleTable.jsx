@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CreateRolePopup from "../CreateRolePopup";
 
@@ -59,8 +59,8 @@ const RoleTable = () => {
       };
         
  return(
-  <div className="bg-white rounded shadow p-4 w-[40%] ml-[5%]">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Roles Management</h2>
+  <div className="bg-white rounded shadow p-4 w-[40%] mr-[5%]">
+        <h2 className="text-center font-semibold text-gray-700 mb-4">Roles Management</h2>
      <div className="h-64 overflow-y-auto border rounded mb-4">
             <table className="table-auto w-full text-left border">
                 <thead className="bg-gray-200">
