@@ -27,7 +27,7 @@ const PageTable = () => {
   };
 
   return (
-    <div className="bg-white rounded shadow p-4 w-[45%] ml-[3%]">
+    <div className="bg-white rounded shadow p-4 w-[40%] ml-[5%]">
       <h2 className="text-center font-semibold text-gray-700 mb-4">Pages</h2>
       <div className="h-64 overflow-y-auto border rounded mb-4">
         <table className="table-auto w-full text-left border">

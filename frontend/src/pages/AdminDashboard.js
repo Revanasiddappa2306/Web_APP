@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AboutPopup from "../components/AboutPopup";
 import ContactPopup from "../components/ContactPopup";
 import PageTable from "../components/tables/PageTable";
 import RoleTable from "../components/tables/RoleTable";
+import UserTable from "../components/tables/UserTable";
+import RolePageAssignmentsTable from "../components/tables/RolePageAssignmentsTable";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -65,11 +67,16 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
 
-       <main className="flex-1 bg-slate-100 p-6">
+       <main className="flex-1 bg-slate-100 p-6 space-y-12">
            <div className="flex justify-between">
                <PageTable />
                <RoleTable />
-             </div>
+               
+            </div>
+           <div className="flex justify-between">
+               <UserTable />
+               <RolePageAssignmentsTable />
+           </div>
         </main>
 
 

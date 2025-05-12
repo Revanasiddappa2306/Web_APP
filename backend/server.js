@@ -26,6 +26,8 @@ app.use("/api/pages", require("./routes/pageRoutes")); // Page routes
 app.use("/api/tables", require("./routes/tables")); // Table routes
 app.use("/api/roles", require("./routes/rolesTable")); // Role routes
 app.use("/api/pageTable", require("./routes/pageTable")); // Page table routes
+app.use("/api/userTable", require("./routes/userTable")); // User table routes
+app.use("/api/rolePage", require("./routes/rolePage")); // Role page routes
 
 // start the server
 app.listen(PORT, () => {
