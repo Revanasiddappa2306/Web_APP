@@ -59,7 +59,7 @@ const RoleTable = () => {
       };
         
  return(
-  <div className="bg-white rounded shadow p-4 w-[40%] mr-[5%]">
+  <div className="bg-white rounded shadow p-4 w-[45%] mr-[2%]">
         <h2 className="text-center font-semibold text-gray-700 mb-4">Roles Management</h2>
      <div className="h-64 overflow-y-auto border rounded mb-4">
             <table className="table-auto w-full text-left border">
@@ -92,7 +92,7 @@ const RoleTable = () => {
                     <button onClick={handleDeleteSelected} disabled={selectedRoles.length === 0} className={`mt-4 px-4 py-2 text-white rounded ${
                     selectedRoles.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
                     }`}> Delete </button>
-                    <button className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Assign</button>
+                    
             </div>
             {showCreateRole && ( <CreateRolePopup onClose={() => setShowCreateRole(false)} onRoleCreated={handleRoleCreated} />)}
     </div>

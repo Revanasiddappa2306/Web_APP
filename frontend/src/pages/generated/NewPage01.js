@@ -2,6 +2,8 @@ import React from "react";
   
   const GeneratedForm = () => {
     const [field_0, setfield_0] = React.useState("");
+const [field_1, setfield_1] = React.useState("");
+const [field_2, setfield_2] = React.useState("");
 
   
     const handleSubmit = async () => {
@@ -12,9 +14,11 @@ import React from "react";
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            tableName: "Test_Table",
+            tableName: "NewPage01_Table",
             data: {
-              "name": field_0
+              "Name": field_0,
+      "Department": field_1,
+      "Shift": field_2
             }
           })
         });
@@ -33,11 +37,23 @@ import React from "react";
   
     return (
       <div className="p-6 bg-white text-black min-h-screen">
-        <h1 className="text-2xl font-bold mb-6">Test</h1>
+        <h1 className="text-2xl font-bold mb-6">NewPage01</h1>
         <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
           
-          <label>name</label>
+          <label>Name</label>
           <input type="text" className="p-2 border rounded mb-2" value={field_0} onChange={(e) => setfield_0(e.target.value)} />
+        
+          <label>Department</label>
+          <input type="text" className="p-2 border rounded mb-2" value={field_1} onChange={(e) => setfield_1(e.target.value)} />
+        
+          <label>Shift</label>
+          <select className="p-2 border rounded mb-2" value={field_2} onChange={(e) => setfield_2(e.target.value)}>
+            <option value="">Select</option>
+            <option value="Morning">Morning</option>
+<option value="Afternoon">Afternoon</option>
+<option value="Evening">Evening</option>
+<option value="Night">Night</option>
+          </select>
         
   
           <button type="button" onClick={handleSubmit} className="bg-blue-500 text-white py-2 px-4 rounded">

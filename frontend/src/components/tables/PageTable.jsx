@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+import AssignPopup from "../PageAssignPopup";
 
 const PageTable = () => {
   const [pages, setPages] = useState([]);
   const [selectedPages, setSelectedPages] = useState([]);
+  const [showAssignPopup, setShowAssignPopup] = useState(false);
+
 
   useEffect(() => {
     fetchPages();
@@ -27,7 +30,7 @@ const PageTable = () => {
   };
 
   return (
-    <div className="bg-white rounded shadow p-4 w-[40%] ml-[5%]">
+    <div className="bg-white rounded shadow p-4 w-[45%] ml-[2%]">
       <h2 className="text-center font-semibold text-gray-700 mb-4">Pages</h2>
       <div className="h-64 overflow-y-auto border rounded mb-4">
         <table className="table-auto w-full text-left border">
@@ -60,7 +63,7 @@ const PageTable = () => {
 
       <div className="flex justify-center">
         <button
-          // onClick={handleAssign}
+         onClick={() => setShowAssignPopup(true)}
           disabled={selectedPages.length === 0}
           className={`mt-2 px-6 py-2 text-white rounded ${
             selectedPages.length === 0
@@ -71,7 +74,10 @@ const PageTable = () => {
           Assign
         </button>
       </div>
+      { showAssignPopup && ( <AssignPopup selectedPages={selectedPages} onClose={() => setShowAssignPopup(false)} /> ) }
     </div>
+
+    
   );
 };
 

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+import UserAssignPopup from "../UserAssignPopup";
 
 const UserTable = () => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [showAssignPopup, setShowAssignPopup] = useState(false);
+  
 
   useEffect(() => {
     fetchUsers();
@@ -27,7 +30,7 @@ const UserTable = () => {
   };
 
   return (
-    <div className="bg-white rounded shadow p-4 w-[40%] ml-[5%]">
+    <div className="bg-white rounded shadow p-4 w-[45%] ml-[2%]">
       <h2 className="text-center font-semibold text-gray-700 mb-4">Users</h2>
       <div className="h-64 overflow-y-auto border rounded mb-4">
         <table className="table-auto w-full text-left border">
@@ -62,7 +65,7 @@ const UserTable = () => {
 
       <div className="flex justify-center">
         <button
-          // onClick={handleAssign}
+          onClick={() => setShowAssignPopup(true)}
           disabled={selectedUsers.length === 0}
           className={`mt-2 px-6 py-2 text-white rounded ${
             selectedUsers.length === 0
@@ -73,6 +76,7 @@ const UserTable = () => {
           Assign
         </button>
       </div>
+          {showAssignPopup && ( <UserAssignPopup userIDs={selectedUsers} onClose={() => setShowAssignPopup(false)}/>)}
     </div>
   );
 };

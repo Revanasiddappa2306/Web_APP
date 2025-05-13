@@ -8,6 +8,7 @@ import PageTable from "../components/tables/PageTable";
 import RoleTable from "../components/tables/RoleTable";
 import UserTable from "../components/tables/UserTable";
 import RolePageAssignmentsTable from "../components/tables/RolePageAssignmentsTable";
+import UserRoleAssignmentsTable from "../components/tables/UserRoleAssignmentsTable";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -76,6 +77,10 @@ const AdminDashboard = () => {
            <div className="flex justify-between">
                <UserTable />
                <RolePageAssignmentsTable />
+           </div>
+
+           <div className="flex justify-between">
+               <UserRoleAssignmentsTable />
            </div>
         </main>
 

@@ -15,4 +15,41 @@ router.get("/get-pages", async (req, res) => {
   }
 });
 
+
+//////////////////////// role page assignment route ////////////////////////////////////////
+router.post('/assign-pages-to-roles', async (req, res) => {
+  const { pageIDs, roleIDs } = req.body;
+
+  if (!Array.isArray(pageIDs) || !Array.isArray(roleIDs)) {
+    return res.status(400).json({ error: "pageIDs and roleIDs must be arrays" });
+  }
+
+  try {
+    const pool = await poolPromise;
+    // const poolConn = await pool.connect();
+    const request = pool.request();
+
+    for (const roleID of roleIDs) {
+      for (const pageID of pageIDs) {
+        await request.query(`
+          IF NOT EXISTS (
+            SELECT 1 FROM Alc_WebFramework.dbo.RolePageAssignments
+            WHERE RoleID = '${roleID}' AND PageID = '${pageID}'
+          )
+          BEGIN
+            INSERT INTO Alc_WebFramework.dbo.RolePageAssignments (RoleID, PageID)
+            VALUES ('${roleID}', '${pageID}')
+          END
+        `);
+      }
+    }
+
+    res.status(200).json({ message: "Pages assigned to roles successfully" });
+  } catch (err) {
+    console.error("Assignment error:", err);
+    res.status(500).json({ error: "Assignment failed" });
+  }
+});
+
+
 module.exports = router;
