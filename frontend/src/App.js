@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import UserLogin from "./pages/UserLogin";
 import AdminLogin from "./pages/AdminLogin";
 import UserRegister from "./pages/UserRegister";
@@ -21,15 +21,12 @@ export default function App() {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/user-register" element={<UserRegister />} />
         <Route path="/admin-register" element={<AdminRegister />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} /> 
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
-
         <Route path="/component-selector" element={<ComponentSelector />} />
         <Route path="/configure-fields" element={<ConfigureFields />} />
         <Route path="/your-pages" element={<YourPages />} />
-        <Route path="/generated/:pageName" element={<DynamicGeneratedPageLoader />} />
-        
-        
+        <Route path="/generated/:pageName" element={<DynamicGeneratedPageLoader />}/>
       </Routes>
     </Router>
   );

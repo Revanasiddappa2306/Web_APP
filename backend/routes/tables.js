@@ -61,14 +61,23 @@ router.post("/create-data-table", async (req, res) => {
 
     let columns = '';
 
+    const typeMap = {
+      DatePicker: "Date",
+      NumberInput: "Number",
+      TextField: "Text",
+      Checkbox: "Checkbox",
+      Dropdown: "Dropdown"
+    };
+
     Object.entries(fieldConfigs).forEach(([key, field], index) => {
       const safeColumnName = field.label
         ? field.label.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")
         : `Field${index + 1}`;
-    
-      // Get the type from the key (e.g., "Number-0" → "Number")
-      const type = key.split("-")[0];
-    
+
+      // Map frontend type to backend type
+      const rawType = field.type || key.split("-")[0];
+      const type = typeMap[rawType] || rawType;
+
       let columnType = "NVARCHAR(255)"; // default
       switch (type) {
         case "Number":
@@ -86,7 +95,7 @@ router.post("/create-data-table", async (req, res) => {
           columnType = "NVARCHAR(255)";
           break;
       }
-    
+
       columns += `${safeColumnName} ${columnType},\n`;
     });
     

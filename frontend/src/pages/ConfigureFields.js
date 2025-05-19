@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // import Button from "../components/Button1";
 import AboutPopup from "../components/AboutPopup";
@@ -14,10 +14,13 @@ const ConfigureFields = () => {
   const [customPageName, setCustomPageName] = useState("");
 
   const handleChange = (key, field, value) => {
+    // Extract type from key (e.g., "Number-0" => "Number")
+    const type = key.split("-")[0];
     setFieldConfigs((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
+        type, // Always set the type
         [field]: value,
       },
     }));
@@ -28,7 +31,6 @@ const ConfigureFields = () => {
       alert("Please enter a custom page name.");
       return;
     }
-
     const cleanPageName = customPageName.trim().replace(/\s+/g, "_");
     const payload = {
       pageName: cleanPageName,

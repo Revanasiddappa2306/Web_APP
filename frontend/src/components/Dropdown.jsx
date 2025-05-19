@@ -1,23 +1,19 @@
-// src/components/Dropdown.js
 import React from "react";
 
-const Dropdown = ({ label, value, options = [], onChange }) => {
-  return (
-    <div className="flex flex-col">
-      <label className="mb-1">{label}</label>
-      <select
-        className="p-2 rounded text-black"
-        value={value}
-        onChange={onChange}
-      >
-        {options.map((opt, idx) => (
-          <option key={idx} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
+const Dropdown = ({ label, value, onChange, options = [] }) => (
+  <div className="flex flex-row items-center justify-center mb-2">
+    <label className="mb-0 mr-4 w-1/5 text-right">{label}</label>
+    <select
+      className="p-2 rounded text-black border border-gray-500 w-3/5 mx-auto shadow-lg"
+      value={value || ""}
+      onChange={e => onChange(e.target.value)}
+    >
+      <option value="">Select</option>
+      {options.map(opt => (
+        <option key={opt} value={opt}>{opt}</option>
+      ))}
+    </select>
+  </div>
+);
 
 export default Dropdown;
