@@ -171,5 +171,72 @@ router.post("/insert-into-table", async (req, res) => {
   }
 });
 
+// Get all rows from a table //////////////////////////////////////////////////////////
+router.post("/get-table-data", async (req, res) => {
+  const { tableName } = req.body;
+  if (!tableName) {
+    return res.status(400).json({ message: "Table name is required" });
+  }
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM [${tableName}] ORDER BY ID DESC`);
+    res.json({ rows: result.recordset });
+  } catch (err) {
+    console.error("❌ Error fetching table data:", err);
+    res.status(500).json({ message: "Error fetching table data", error: err.message });
+  }
+});
+
+// Update a row by ID //////////////////////////////////////////////////////////////////////////////
+router.post("/update-row", async (req, res) => {
+  const { tableName, id, data } = req.body;
+  if (!tableName || !id || !data || typeof data !== "object") {
+    return res.status(400).json({ message: "Table name, id, and data are required" });
+  }
+  try {
+    const pool = await poolPromise;
+    const setClause = Object.keys(data)
+      .map((col, idx) => `[${col}] = @param${idx}`)
+      .join(", ");
+    const request = pool.request();
+    Object.entries(data).forEach(([key, value], idx) => {
+      const paramName = `param${idx}`;
+      if (typeof value === "number") {
+        request.input(paramName, sql.Int, value);
+      } else if (!isNaN(Date.parse(value))) {
+        request.input(paramName, sql.DateTime, new Date(value));
+      } else {
+        request.input(paramName, sql.NVarChar, value);
+      }
+    });
+    request.input("id", sql.Int, id);
+    await request.query(`UPDATE [${tableName}] SET ${setClause} WHERE ID = @id`);
+    res.json({ message: "Row updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating row:", err);
+    res.status(500).json({ message: "Error updating row", error: err.message });
+  }
+});
+
+// Delete rows by IDs ////////////////////////////////////////////////////////////
+router.post("/delete-rows", async (req, res) => {
+  const { tableName, ids } = req.body;
+  if (!tableName || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: "Table name and ids array are required" });
+  }
+  try {
+    const pool = await poolPromise;
+    const idParams = ids.map((_, i) => `@id${i}`).join(", ");
+    const request = pool.request();
+    ids.forEach((id, i) => {
+      request.input(`id${i}`, sql.Int, id);
+    });
+    await request.query(`DELETE FROM [${tableName}] WHERE ID IN (${idParams})`);
+    res.json({ message: "Rows deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting rows:", err);
+    res.status(500).json({ message: "Error deleting rows", error: err.message });
+  }
+});
 
 module.exports = router;

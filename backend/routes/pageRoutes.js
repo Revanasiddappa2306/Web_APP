@@ -202,17 +202,42 @@ router.post("/generate-form", (req, res) => {
 
     return `import React from "react";
 ${imports}
+import { useState } from "react";
+import AboutPopup from "../../components/AboutPopup";
+import ContactPopup from "../../components/ContactPopup";
 
 const GeneratedForm = () => {
   ${stateDeclarations}
+  
+  const [tableData, setTableData] = React.useState([]);
+  const [selectedRows, setSelectedRows] = React.useState([]);
+  const [editingIndex, setEditingIndex] = React.useState(null);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
-  const handleSubmit = async () => {
+  // Fetch table data
+  React.useEffect(() => {
+    fetch("http://localhost:5000/api/tables/get-table-data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tableName: "${pageName}_Table" })
+    })
+      .then(res => res.json())
+      .then(data => setTableData(data.rows || []));
+  }, []);
+
+  // Helper: clear form fields
+  const clearFields = () => {
+    ${Object.entries(fieldConfigs).map(([_, config], index) => `setfield_${index}("");`).join("\n    ")}
+    setEditingIndex(null);
+  };
+
+  // Enter (Insert)
+  const handleEnter = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/tables/insert-into-table", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tableName: "${pageName}_Table",
           data: {
@@ -220,17 +245,70 @@ const GeneratedForm = () => {
           }
         })
       });
-
-      const result = await response.json();
-      if (response.ok) {
-        alert("✅ Data inserted successfully");
-      } else {
-        alert("❌ Failed to insert data: " + result.message);
-      }
+      if (response.ok) window.location.reload();
+      else alert("❌ Failed to insert data");
     } catch (err) {
-      console.error("Error inserting data", err);
       alert("❌ Unexpected error");
     }
+  };
+
+  // Update
+  const handleUpdate = async () => {
+    if (editingIndex === null) return;
+    const row = tableData[editingIndex];
+    try {
+      const response = await fetch("http://localhost:5000/api/tables/update-row", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tableName: "${pageName}_Table",
+          id: row.ID,
+          data: {
+            ${dataObject}
+          }
+        })
+      });
+      if (response.ok) window.location.reload();
+      else alert("❌ Failed to update data");
+    } catch (err) {
+      alert("❌ Unexpected error");
+    }
+  };
+
+  // Delete
+  const handleDelete = async () => {
+    if (selectedRows.length === 0) return;
+    try {
+      const response = await fetch("http://localhost:5000/api/tables/delete-rows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tableName: "${pageName}_Table",
+          ids: selectedRows
+        })
+      });
+      if (response.ok) window.location.reload();
+      else alert("❌ Failed to delete data");
+    } catch (err) {
+      alert("❌ Unexpected error");
+    }
+  };
+
+  // Row click: load data into fields
+  const handleRowClick = idx => {
+    const row = tableData[idx];
+    ${Object.entries(fieldConfigs).map(([_, config], index) => {
+      const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
+      return `setfield_${index}(row["${fieldName}"] ?? "");`;
+    }).join("\n    ")}
+    setEditingIndex(idx);
+  };
+
+  // Row select (checkbox)
+  const handleSelectRow = id => {
+    setSelectedRows(prev =>
+      prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
+    );
   };
 
   return (
@@ -247,8 +325,8 @@ const GeneratedForm = () => {
           <nav className="flex items-center gap-8 text-lg font-medium">
             <button onClick={() => window.location.href = "/admin-dashboard"} className="hover:text-yellow-300">Home</button>
             <button onClick={() => window.location.href = "/your-pages"} className="hover:text-yellow-300">Pages</button>
-            <button onClick={() => alert('About')} className="hover:underline">About</button>
-            <button onClick={() => alert('Contact')} className="hover:underline">Contact</button>
+            <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
+            <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>
         </div>
       </header>
@@ -258,17 +336,66 @@ const GeneratedForm = () => {
         <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
         <form className="flex flex-col gap-4 w-full max-w-2xl" onSubmit={e => e.preventDefault()}>
           ${inputsCode}
-          <div className="flex justify-end mt-4">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg"
-            >
+          <div className="flex gap-2 justify-end mt-4">
+            <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg" >
               Enter
+            </button>
+            <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
+              Update
+            </button>
+            <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
+              Delete
+            </button>
+            <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
+              Clear
             </button>
           </div>
         </form>
+        <hr className="my-6 w-full max-w-2xl border-t-2 border-gray-300" />
+        {/* Data Table */}
+        <div className="w-full max-w-2xl">
+          <table className="min-w-full bg-white border border-gray-300 shadow">
+            <thead>
+              <tr>
+                <th className="p-2 border-b"></th>
+                ${Object.entries(fieldConfigs).map(([_, config]) =>
+                  `<th className="p-2 border-b">${config.label}</th>`
+                ).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row, idx) => (
+                <tr
+                  key={row.ID}
+                  className="hover:bg-blue-100 cursor-pointer"
+                  onClick={() => handleRowClick(idx)}
+                >
+                  <td className="p-2 border-b text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(row.ID)}
+                      onChange={e => {
+                        e.stopPropagation();
+                        handleSelectRow(row.ID);
+                      }}
+                    />
+                  </td>
+                  ${Object.entries(fieldConfigs).map(([_, config]) => {
+                    const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
+                    // If this is a Date field, format it
+                    if ((config.type || "").toLowerCase().includes("date")) {
+                      return `<td className="p-2 border-b">{row["${fieldName}"] ? new Date(row["${fieldName}"]).toLocaleDateString() : ""}</td>`;
+                    }
+                    return `<td className="p-2 border-b">{row["${fieldName}"]}</td>`;
+                  }).join("")}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </main>
+       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
+       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">
