@@ -1,5 +1,5 @@
 // src/pages/Dashboard.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,6 +14,7 @@ const UserDashboard = () => {
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [hoveredRole, setHoveredRole] = useState(null);
+  const hideTimeout = useRef();
 
   useEffect(() => {
     // Fetch roles assigned to this user
@@ -48,6 +49,16 @@ const UserDashboard = () => {
     }, 1500);
   };
 
+  const handleMouseEnter = (roleID) => {
+    clearTimeout(hideTimeout.current);
+    setHoveredRole(roleID);
+    fetchPagesForRole(roleID);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeout.current = setTimeout(() => setHoveredRole(null), 200); // 200ms delay
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
@@ -75,52 +86,55 @@ const UserDashboard = () => {
           <table className="min-w-full bg-white border border-gray-300 shadow">
             <thead>
               <tr>
-                <th className="p-2 border-b text-left">Role ID</th>
-                <th className="p-2 border-b text-left">Role Name</th>
-                <th className="p-2 border-b text-left">Pages</th>
+                <th className="px-2 py-3 border-b w-28 text-left">Role ID</th>
+                <th className="px-2 py-3 border-b w-40 text-left">Role Name</th>
+                <th className="px-2 py-3 border-b w-32 text-left">Pages</th>
               </tr>
             </thead>
             <tbody>
               {roles.map(role => (
                 <tr
                   key={role.RoleID}
-                  className="hover:bg-blue-100 cursor-pointer relative"
-                  onMouseEnter={() => {
-                    setHoveredRole(role.RoleID);
-                    fetchPagesForRole(role.RoleID);
-                  }}
-                  onMouseLeave={() => setHoveredRole(null)}
+                  className="hover:bg-blue-100 cursor-pointer"
                 >
-                  <td className="p-2 border-b">{role.RoleID}</td>
-                  <td className="p-2 border-b">{role.Name}</td>
-                  <td className="p-2 border-b relative">
-                    {hoveredRole === role.RoleID && (
-                      <div
-                        className="absolute left-3/4 top-0 w-56 bg-white border rounded shadow-lg z-10 p-2"
-                        onMouseEnter={() => setHoveredRole(role.RoleID)}
-                        onMouseLeave={() => setHoveredRole(null)}
-                      >
-                        <div className="font-semibold mb-2 text-sm text-gray-700">Pages:</div>
-                        {rolePages[role.RoleID]?.length > 0 ? (
-                          <ul>
-                            {rolePages[role.RoleID].map(page => (
-                              <li
-                                key={page.PageID}
-                                className="text-blue-700 text-sm py-1 hover:underline cursor-pointer"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  navigate(`/generated/${page.PageName.replace(/\s+/g, "_")}`);
-                                }}
-                              >
-                                {page.PageName}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <div className="text-gray-500 text-xs">No pages assigned</div>
-                        )}
-                      </div>
-                    )}
+                  <td className="px-2 py-3 border-b w-28">{role.RoleID}</td>
+                  <td className="px-2 py-3 border-b w-40">{role.Name}</td>
+                  <td className="px-2 py-3 border-b w-32 relative">
+                    <span
+                      className="text-blue-700 text-xs underline cursor-pointer"
+                      onMouseEnter={() => handleMouseEnter(role.RoleID)}
+                      onMouseLeave={handleMouseLeave}
+                      style={{ position: "relative" }}
+                    >
+                      Hover to see
+                      {hoveredRole === role.RoleID && (
+                        <div
+                          className="absolute left-1/2 -translate-x-1/4 top-full mt-1 w-56 bg-white border rounded shadow-lg z-20 p-2 pointer-events-auto"
+                          onMouseEnter={() => clearTimeout(hideTimeout.current)}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <div className="font-semibold mb-2 text-sm text-gray-700">Pages:</div>
+                          {rolePages[role.RoleID]?.length > 0 ? (
+                            <ul>
+                              {rolePages[role.RoleID].map(page => (
+                                <li
+                                  key={page.PageID}
+                                  className="text-blue-700 text-sm py-1 hover:underline cursor-pointer"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    navigate(`/generated/${page.PageName.replace(/\s+/g, "_")}`);
+                                  }}
+                                >
+                                  {page.PageName}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="text-gray-500 text-xs">No pages assigned</div>
+                          )}
+                        </div>
+                      )}
+                    </span>
                   </td>
                 </tr>
               ))}

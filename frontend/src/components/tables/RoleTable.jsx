@@ -89,7 +89,7 @@ const RoleTable = () => {
         </div>
             <div className="flex justify-center gap-6">
                     <button onClick={() => setShowCreateRole(true)} className="bg-[#003595] text-white px-4 py-2 rounded hover:bg-blue-800"> Create Role </button>
-                    <button onClick={handleDeleteSelected} disabled={selectedRoles.length === 0} className={`mt-4 px-4 py-2 text-white rounded ${
+                    <button onClick={handleDeleteSelected} disabled={selectedRoles.length === 0} className={` px-4 py-2 text-white rounded ${
                     selectedRoles.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
                     }`}> Delete </button>
                     

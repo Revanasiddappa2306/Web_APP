@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,6 +9,22 @@ const Home = () => {
   const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+
+  // Prevent back navigation to protected pages
+  useEffect(() => {
+    // Push and then replace to make Home the only entry in history
+    window.history.pushState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", window.location.pathname);
+
+    const handlePopState = () => {
+      // Always stay on Home if not logged in
+      navigate("/home", { replace: true });
+      window.history.pushState(null, "", window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [navigate]);
 
   const handleUserLogin = () => navigate("/user-login");
   const handleAdminLogin = () => navigate("/admin-login");
