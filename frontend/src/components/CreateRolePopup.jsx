@@ -19,6 +19,7 @@ const CreateRolePopup = ({ onClose, onRoleCreated }) => {
       if (res.ok) {
         onRoleCreated(data); // Pass the created role to parent
         onClose();
+        window.location.reload();
       } else {
         alert(data.message || "Failed to create role");
       }

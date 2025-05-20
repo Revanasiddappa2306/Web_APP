@@ -73,5 +73,30 @@ router.delete("/delete-role/:RoleID", async (req, res) => {
 });
 
 
+// Get pages assigned to a role ////////////////////////////////////////////////////////////
+router.post("/get-role-pages", async (req, res) => {
+  const { roleID } = req.body;
+  if (!roleID) {
+    return res.status(400).json({ message: "roleID is required" });
+  }
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("RoleID", sql.VarChar(50), roleID)
+      .query(`
+        SELECT p.PageID, p.PageName
+        FROM Alc_WebFramework.dbo.RolePageAssignments rpa
+        JOIN Alc_WebFramework.dbo.Pages p ON rpa.PageID = p.PageID
+        WHERE rpa.RoleID = @RoleID
+      `);
+    console.log("Pages for role", roleID, result.recordset); // <-- Add this line
+    res.json({ pages: result.recordset });
+  } catch (err) {
+    console.error("❌ Error fetching role pages:", err);
+    res.status(500).json({ message: "Failed to fetch role pages" });
+  }
+});
+
+
 
 module.exports = router;

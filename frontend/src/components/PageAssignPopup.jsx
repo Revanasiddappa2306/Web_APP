@@ -40,6 +40,7 @@ const AssignPopup = ({ onClose, selectedPages }) => {
       if (res.ok) {
         alert("Pages assigned successfully!");
         onClose();
+        window.location.reload();
       } else {
         alert("Assignment failed");
       }

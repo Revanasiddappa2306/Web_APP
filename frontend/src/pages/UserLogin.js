@@ -28,7 +28,8 @@ export default function UserLogin() {
           autoClose: 1500,
         });
         localStorage.setItem("token", data.token);
-        setTimeout(() => navigate("/user-dashboard"), 1500); // Navigate after toast
+        localStorage.setItem("user", JSON.stringify(data.user)); // <-- add this line
+        setTimeout(() => navigate("/user-dashboard"), 1500);
       } else {
         toast.error(data.message || "Login failed!", {
           position: "top-center",

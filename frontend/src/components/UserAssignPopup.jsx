@@ -39,6 +39,7 @@ const UserAssignPopup = ({ userIDs, onClose }) => {
       const data = await res.json();
       alert(data.message);
       onClose();
+      window.location.reload();
     } catch (err) {
       console.error("Error assigning users to roles:", err);
       alert("Error assigning users");

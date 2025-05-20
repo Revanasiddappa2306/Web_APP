@@ -49,5 +49,28 @@ router.post('/assign-users-to-roles', async (req, res) => {
   }
 });
 
+// Get roles assigned to a user /////////////////////////////////////////////////////////
+router.post("/get-user-roles", async (req, res) => {
+  const { userID } = req.body;
+  if (!userID) {
+    return res.status(400).json({ message: "userID is required" });
+  }
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("UserID", sql.VarChar(50), userID)
+      .query(`
+        SELECT r.RoleID, r.Name
+        FROM Alc_WebFramework.dbo.UserRoleAssignments ura
+        JOIN Alc_WebFramework.dbo.Roles r ON ura.RoleID = r.RoleID
+        WHERE ura.UserID = @UserID
+      `);
+    res.json({ roles: result.recordset });
+  } catch (err) {
+    console.error("❌ Error fetching user roles:", err);
+    res.status(500).json({ message: "Failed to fetch user roles" });
+  }
+});
+
 
 module.exports = router;
