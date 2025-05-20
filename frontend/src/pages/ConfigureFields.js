@@ -13,6 +13,8 @@ const ConfigureFields = () => {
   const [fieldConfigs, setFieldConfigs] = useState({});
   const [customPageName, setCustomPageName] = useState("");
 
+  const admin = JSON.parse(localStorage.getItem("admin")); // <-- Add this line
+
   const handleChange = (key, field, value) => {
     // Extract type from key (e.g., "Number-0" => "Number")
     const type = key.split("-")[0];
@@ -58,7 +60,7 @@ const ConfigureFields = () => {
           body: JSON.stringify({
             PageName: customPageName,
             StoragePath: `frontend\\src\\pages\\generated\\${result.fileName}`,
-            CreatedByAdminID: "Ad01",
+            CreatedByAdminID: admin?.id, // <-- Use admin id from localStorage
           }),
         });
 

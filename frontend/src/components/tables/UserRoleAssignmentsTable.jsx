@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import { toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const UserRoleAssignmentsTable = () => {
@@ -27,6 +27,30 @@ const UserRoleAssignmentsTable = () => {
         ? prev.filter((k) => k !== key)
         : [...prev, key]
     );
+  };
+
+  const handleRemoveSelected = async () => {
+    if (!window.confirm(`Remove ${selectedAssignments.length} assignment(s)?`)) return;
+    try {
+      for (const key of selectedAssignments) {
+        const [UserID, RoleID] = key.split("-");
+        await fetch("http://localhost:5000/api/roleuser/user-role-assignments/remove", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ UserID, RoleID }),
+        });
+      }
+      toast.success("Selected assignments removed successfully", { autoClose: 1000 });
+      setAssignments((prev) =>
+        prev.filter(
+          (item) => !selectedAssignments.includes(`${item.UserID}-${item.RoleID}`)
+        )
+      );
+      setSelectedAssignments([]);
+    } catch (err) {
+      console.error("❌ Error deleting assignments:", err);
+      toast.error("Error removing assignments");
+    }
   };
 
   return (
@@ -65,7 +89,7 @@ const UserRoleAssignmentsTable = () => {
       </div>
       <div className="flex justify-center">
         <button
-          // onClick={handleRemoveSelected}
+          onClick={handleRemoveSelected}
           disabled={selectedAssignments.length === 0}
           className={`px-6 py-2 text-white rounded ${
             selectedAssignments.length === 0

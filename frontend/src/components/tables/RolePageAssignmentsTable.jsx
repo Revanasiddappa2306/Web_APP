@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import { toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const RolePageAssignmentsTable = () => {
@@ -29,34 +29,34 @@ const RolePageAssignmentsTable = () => {
     );
   };
 
-  // const handleRemoveSelected = async () => {
-  //   const confirmDelete = window.confirm(`Remove ${selectedAssignments.length} assignment(s)?`);
-  //   if (!confirmDelete) return;
+  const handleRemoveSelected = async () => {
+    const confirmDelete = window.confirm(`Remove ${selectedAssignments.length} assignment(s)?`);
+    if (!confirmDelete) return;
 
-  //   try {
-  //     for (const key of selectedAssignments) {
-  //       const [pageID, roleID] = key.split("-");
-  //       await fetch(`http://localhost:5000/api/rolePage/role-page-assignments/remove`, {
-  //         method: "DELETE",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ PageID: pageID, RoleID: roleID }),
-  //       });
-  //     }
+    try {
+      for (const key of selectedAssignments) {
+        const [pageID, roleID] = key.split("-");
+        await fetch("http://localhost:5000/api/rolePage/role-page-assignments/remove", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ PageID: pageID, RoleID: roleID }),
+        });
+      }
 
-  //     toast.success("Selected assignments removed successfully");
-  //     setAssignments((prev) =>
-  //       prev.filter(
-  //         (item) => !selectedAssignments.includes(`${item.PageID}-${item.RoleID}`)
-  //       )
-  //     );
-  //     setSelectedAssignments([]);
-  //   } catch (err) {
-  //     console.error("❌ Error deleting assignments:", err);
-  //     toast.error("Error removing assignments");
-  //   }
-  // };
+      toast.success("Selected assignments removed successfully", { autoClose: 1000 });
+      setAssignments((prev) =>
+        prev.filter(
+          (item) => !selectedAssignments.includes(`${item.PageID}-${item.RoleID}`)
+        )
+      );
+      setSelectedAssignments([]);
+    } catch (err) {
+      console.error("❌ Error deleting assignments:", err);
+      toast.error("Error removing assignments");
+    }
+  };
 
   return (
     <div className="bg-white rounded shadow p-4 w-[45%] mr-[2%]">
@@ -94,7 +94,7 @@ const RolePageAssignmentsTable = () => {
       </div>
       <div className="flex justify-center">
         <button
-          // onClick={handleRemoveSelected}
+          onClick={handleRemoveSelected}
           disabled={selectedAssignments.length === 0}
           className={`px-6 py-2 text-white rounded ${
             selectedAssignments.length === 0

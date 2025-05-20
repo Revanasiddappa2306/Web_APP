@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const router = express.Router();
 
+////////////////////////////// role-page assignment route ////////////////////////////////////////
 router.get('/user-role-assignments', async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -11,6 +12,22 @@ router.get('/user-role-assignments', async (req, res) => {
     res.json(result.recordset);
   } catch (err) {
     console.error('Error fetching role-page assignments:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+////////////////////////////////// role-page assignment remove route ////////////////////////////////////////
+router.delete('/user-role-assignments/remove', async (req, res) => {
+  const { UserID, RoleID } = req.body;
+  try {
+    const pool = await poolPromise;
+    await pool.request()
+      .input('UserID', sql.VarChar, UserID)
+      .input('RoleID', sql.VarChar, RoleID)
+      .query('DELETE FROM Alc_WebFramework.dbo.UserRoleAssignments WHERE UserID = @UserID AND RoleID = @RoleID');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting user-role assignment:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

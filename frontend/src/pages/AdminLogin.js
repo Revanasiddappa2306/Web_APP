@@ -26,6 +26,7 @@ export default function AdminLogin() {
           autoClose: 1500,
         });
         localStorage.setItem("token", data.token);
+        localStorage.setItem("admin", JSON.stringify(data.admin)); // <-- Save admin info
         setTimeout(() => navigate("/admin-dashboard"), 1500); // Navigate after toast
       } else {
         toast.error(data.message || "Login failed!", {

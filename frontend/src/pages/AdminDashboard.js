@@ -12,9 +12,10 @@ import UserRoleAssignmentsTable from "../components/tables/UserRoleAssignmentsTa
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const admin = JSON.parse(localStorage.getItem("admin")); // { name, id }
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
-  // const [roles, setRoles] = useState([]);
+  
   
   const handleYourPagesClick = () => {
     navigate("/your-pages");
@@ -67,9 +68,14 @@ const AdminDashboard = () => {
       </header>
 
       {/* Main Content */}
-
-       <main className="flex-1 bg-slate-100 p-6 space-y-12">
-           <div className="flex justify-between">
+      <main className="flex-1 bg-slate-100 p-6 space-y-12">
+        {/* Admin info top left */}
+        <div className="mb-6">
+          <span className="font-semibold text-lg text-blue-900">
+            {admin?.name} <span className="text-base text-gray-700">({admin?.id})</span>
+          </span>
+        </div>
+        <div className="flex justify-between">
                <PageTable />
                <RoleTable />
                

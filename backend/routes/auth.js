@@ -217,7 +217,14 @@ router.post("/admin-login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ message: "Login successful 👍", token });
+    res.json({
+      message: "Login successful 👍",
+      token,
+      admin: {
+        id: admin.AdminID,
+        name: admin.FirstName + " " + admin.LastName
+      }
+    });
   } catch (err) {
     console.error("❌ Login Error:", err.message);
     console.error(err);
