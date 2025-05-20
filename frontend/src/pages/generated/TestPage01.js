@@ -1,13 +1,17 @@
 import React from "react";
 import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
+import DatePicker from "../../components/DatePicker";
 import { useState } from "react";
 import AboutPopup from "../../components/AboutPopup";
 import ContactPopup from "../../components/ContactPopup";
+import { useNavigate } from "react-router-dom";
 
 const GeneratedForm = () => {
   const [field_0, setfield_0] = React.useState("");
 const [field_1, setfield_1] = React.useState("");
+const [field_2, setfield_2] = React.useState("");
+const [field_3, setfield_3] = React.useState("");
 
   
   const [tableData, setTableData] = React.useState([]);
@@ -15,22 +19,37 @@ const [field_1, setfield_1] = React.useState("");
   const [editingIndex, setEditingIndex] = React.useState(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const navigate = useNavigate();
+
+  const goHome = () => {
+    const admin = localStorage.getItem("admin");
+    const user = localStorage.getItem("user");
+    if (admin && admin !== "undefined" && admin !== "{}") {
+      navigate("/admin-dashboard");
+    } else if (user && user !== "undefined" && user !== "{}") {
+      navigate("/user-dashboard");
+    } else {
+      navigate("/home");
+    }
+  };
 
   // Fetch table data
   React.useEffect(() => {
     fetch("http://localhost:5000/api/tables/get-table-data", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tableName: "Test01_Table" })
+      body: JSON.stringify({ tableName: "TestPage01_Table" })
     })
       .then(res => res.json())
-      .then(data => setTableData(data.rows || []));
+      .then (data => setTableData(data.rows || []));
   }, []);
 
   // Helper: clear form fields
   const clearFields = () => {
     setfield_0("");
     setfield_1("");
+    setfield_2("");
+    setfield_3("");
     setEditingIndex(null);
   };
 
@@ -41,10 +60,12 @@ const [field_1, setfield_1] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "Test01_Table",
+          tableName: "TestPage01_Table",
           data: {
             "Name": field_0,
-      "Shift": field_1
+      "Department": field_1,
+      "Shift": field_2,
+      "Date": field_3
           }
         })
       });
@@ -64,11 +85,13 @@ const [field_1, setfield_1] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "Test01_Table",
+          tableName: "TestPage01_Table",
           id: row.ID,
           data: {
             "Name": field_0,
-      "Shift": field_1
+      "Department": field_1,
+      "Shift": field_2,
+      "Date": field_3
           }
         })
       });
@@ -87,7 +110,7 @@ const [field_1, setfield_1] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "Test01_Table",
+          tableName: "TestPage01_Table",
           ids: selectedRows
         })
       });
@@ -102,7 +125,9 @@ const [field_1, setfield_1] = React.useState("");
   const handleRowClick = idx => {
     const row = tableData[idx];
     setfield_0(row["Name"] ?? "");
-    setfield_1(row["Shift"] ?? "");
+    setfield_1(row["Department"] ?? "");
+    setfield_2(row["Shift"] ?? "");
+    setfield_3(row["Date"] ?? "");
     setEditingIndex(idx);
   };
 
@@ -120,13 +145,12 @@ const [field_1, setfield_1] = React.useState("");
         <div className="container mx-auto flex justify-between items-center">
           <h1
             className="text-3xl font-bold cursor-pointer"
-            onClick={() => window.location.href = "/admin-dashboard"}
+            onClick={goHome}
           >
             Alcon
           </h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
-            <button onClick={() => window.location.href = "/admin-dashboard"} className="hover:text-yellow-300">Home</button>
-            <button onClick={() => window.location.href = "/your-pages"} className="hover:text-yellow-300">Pages</button>
+            <button onClick={goHome} className="hover:text-yellow-300">Home</button>
             <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
             <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>
@@ -135,7 +159,7 @@ const [field_1, setfield_1] = React.useState("");
 
       {/* Main Content */}
       <main className="flex-1 p-6 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-6 text-center">Test01</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">TestPage01</h1>
         <form className="flex flex-col gap-4 w-full max-w-2xl" onSubmit={e => e.preventDefault()}>
           
           <TextField
@@ -145,10 +169,23 @@ const [field_1, setfield_1] = React.useState("");
           />
         
           <Dropdown
-            label="Shift"
+            label="Department"
             value={field_1}
             onChange={setfield_1}
-            options={["A","B","C"]}
+            options={["MTO","BTP","QRA","SAP"]}
+          />
+        
+          <Dropdown
+            label="Shift"
+            value={field_2}
+            onChange={setfield_2}
+            options={["Morning","Afternoon","Night"]}
+          />
+        
+          <DatePicker
+            label="Date"
+            value={field_3}
+            onChange={setfield_3}
           />
         
           <div className="flex gap-2 justify-end mt-4">
@@ -173,7 +210,7 @@ const [field_1, setfield_1] = React.useState("");
             <thead>
               <tr>
                 <th className="p-2 border-b"></th>
-                <th className="p-2 border-b">Name</th><th className="p-2 border-b">Shift</th>
+                <th className="p-2 border-b">Name</th><th className="p-2 border-b">Department</th><th className="p-2 border-b">Shift</th><th className="p-2 border-b">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -193,7 +230,7 @@ const [field_1, setfield_1] = React.useState("");
                       }}
                     />
                   </td>
-                  <td className="p-2 border-b">{row["Name"]}</td><td className="p-2 border-b">{row["Shift"]}</td>
+                  <td className="p-2 border-b">{row["Name"]}</td><td className="p-2 border-b">{row["Department"]}</td><td className="p-2 border-b">{row["Shift"]}</td><td className="p-2 border-b">{row["Date"] ? new Date(row["Date"]).toLocaleDateString() : ""}</td>
                 </tr>
               ))}
             </tbody>

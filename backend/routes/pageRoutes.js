@@ -205,6 +205,7 @@ ${imports}
 import { useState } from "react";
 import AboutPopup from "../../components/AboutPopup";
 import ContactPopup from "../../components/ContactPopup";
+import { useNavigate } from "react-router-dom";
 
 const GeneratedForm = () => {
   ${stateDeclarations}
@@ -214,6 +215,19 @@ const GeneratedForm = () => {
   const [editingIndex, setEditingIndex] = React.useState(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const navigate = useNavigate();
+
+  const goHome = () => {
+    const admin = localStorage.getItem("admin");
+    const user = localStorage.getItem("user");
+    if (admin && admin !== "undefined" && admin !== "{}") {
+      navigate("/admin-dashboard");
+    } else if (user && user !== "undefined" && user !== "{}") {
+      navigate("/user-dashboard");
+    } else {
+      navigate("/home");
+    }
+  };
 
   // Fetch table data
   React.useEffect(() => {
@@ -318,13 +332,12 @@ const GeneratedForm = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1
             className="text-3xl font-bold cursor-pointer"
-            onClick={() => window.location.href = "/admin-dashboard"}
+            onClick={goHome}
           >
             Alcon
           </h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
-            <button onClick={() => window.location.href = "/admin-dashboard"} className="hover:text-yellow-300">Home</button>
-            <button onClick={() => window.location.href = "/your-pages"} className="hover:text-yellow-300">Pages</button>
+            <button onClick={goHome} className="hover:text-yellow-300">Home</button>
             <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
             <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>

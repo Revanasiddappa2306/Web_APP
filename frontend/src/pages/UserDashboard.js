@@ -40,6 +40,7 @@ const UserDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     toast.info("Logged out successfully!", { autoClose: 1500 });
     setTimeout(() => {
       navigate("/home");

@@ -27,6 +27,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("admin");
     toast.info("Logged out successfully!", { autoClose: 1500 });
     setTimeout(() => {
       navigate("/home");

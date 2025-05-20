@@ -9,6 +9,7 @@ const ConfigureFields = () => {
   const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [isCompiling, setIsCompiling] = useState(false);
   const selectedComponents = location.state?.selectedComponents || {};
   const [fieldConfigs, setFieldConfigs] = useState({});
   const [customPageName, setCustomPageName] = useState("");
@@ -90,6 +91,11 @@ const ConfigureFields = () => {
 
           if (createTableResponse.ok) {
             alert("✅ Data table created successfully!");
+            setIsCompiling(true);
+            setTimeout(() => {
+              navigate(`/generated/${result.fileName.replace(".js", "")}`);
+              setIsCompiling(false);
+            }, 2500); // 2.5 seconds, adjust as needed
           } else {
             alert("⚠️ Failed to create data table.");
             console.error("Table Creation Error:", tableResult.message);
@@ -245,6 +251,20 @@ const ConfigureFields = () => {
       {/* Modal */}
       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
+
+      {/* Compiling Overlay */}
+      {isCompiling && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded shadow flex flex-col items-center">
+            <svg className="animate-spin h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <div className="text-lg font-semibold text-blue-700">Compiling your page...</div>
+            <div className="text-gray-500 mt-2 text-sm">This may take a few seconds.</div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">
