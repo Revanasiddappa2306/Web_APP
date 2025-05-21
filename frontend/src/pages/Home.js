@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AboutPopup from "../components/AboutPopup";
-import ContactPopup from "../components/ContactPopup";
+import AboutPopup from "../components/popups/AboutPopup";
+import ContactPopup from "../components/popups/ContactPopup";
+import AdminLogin from "../components/popups/AdminLoginPopup";
+import UserLogin from "../components/popups/UserLoginPopup";
 
 const Home = () => {
   const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showUserLogin, setShowUserLogin] = useState(false);
 
   // Prevent back navigation to protected pages
   useEffect(() => {
@@ -26,9 +30,6 @@ const Home = () => {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [navigate]);
 
-  const handleUserLogin = () => navigate("/user-login");
-  const handleAdminLogin = () => navigate("/admin-login");
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
@@ -41,8 +42,8 @@ const Home = () => {
             <div className="group relative">
               <button className="hover:underline focus:outline-none">Login</button>
               <div className="absolute top-full left-0 mt-2 w-40 bg-white text-black shadow-lg rounded-md opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-200 z-10">
-                <button onClick={handleAdminLogin} className="block w-full text-left px-4 py-2 hover:bg-blue-100">Admin Login</button>
-                <button onClick={handleUserLogin} className="block w-full text-left px-4 py-2 hover:bg-blue-100">User Login</button>
+                <button onClick={() => setShowAdminLogin(true)} className="block w-full text-left px-4 py-2 hover:bg-blue-100">Admin Login</button>
+                <button onClick={() => setShowUserLogin(true)} className="block w-full text-left px-4 py-2 hover:bg-blue-100">User Login</button>
               </div>
             </div>
 
@@ -63,6 +64,8 @@ const Home = () => {
       {/* Modal */}
       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
+      {showAdminLogin && <AdminLogin onClose={() => setShowAdminLogin(false)} />}
+      {showUserLogin && <UserLogin onClose={() => setShowUserLogin(false)} />}
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center py-4 mt-auto shadow-inner">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AssignPopup from "../PageAssignPopup";
+import AssignPopup from "../popups/PageAssignPopup";
 
 const PageTable = () => {
   const [pages, setPages] = useState([]);

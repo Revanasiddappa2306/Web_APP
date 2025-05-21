@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // import Button from "../components/Button1";
-import AboutPopup from "../components/AboutPopup";
-import ContactPopup from "../components/ContactPopup";
+import AboutPopup from "../components/popups/AboutPopup";
+import ContactPopup from "../components/popups/ContactPopup";
 
 const ConfigureFields = () => {
   const location = useLocation();

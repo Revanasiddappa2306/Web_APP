@@ -2,14 +2,13 @@ import React from "react";
 import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
 import { useState } from "react";
-import AboutPopup from "../../components/AboutPopup";
-import ContactPopup from "../../components/ContactPopup";
+import AboutPopup from "../../components/popups/AboutPopup";
+import ContactPopup from "../../components/popups/ContactPopup";
 import { useNavigate } from "react-router-dom";
 
 const GeneratedForm = () => {
   const [field_0, setfield_0] = React.useState("");
 const [field_1, setfield_1] = React.useState("");
-const [field_2, setfield_2] = React.useState("");
 
   
   const [tableData, setTableData] = React.useState([]);
@@ -36,7 +35,7 @@ const [field_2, setfield_2] = React.useState("");
     fetch("http://localhost:5000/api/tables/get-table-data", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tableName: "Admin2Page_Table" })
+      body: JSON.stringify({ tableName: "Siddu23_Table" })
     })
       .then(res => res.json())
       .then(data => setTableData(data.rows || []));
@@ -46,7 +45,6 @@ const [field_2, setfield_2] = React.useState("");
   const clearFields = () => {
     setfield_0("");
     setfield_1("");
-    setfield_2("");
     setEditingIndex(null);
   };
 
@@ -57,11 +55,10 @@ const [field_2, setfield_2] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "Admin2Page_Table",
+          tableName: "Siddu23_Table",
           data: {
             "Name": field_0,
-      "Available": field_1,
-      "Gender": field_2
+      "Department": field_1
           }
         })
       });
@@ -81,12 +78,11 @@ const [field_2, setfield_2] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "Admin2Page_Table",
+          tableName: "Siddu23_Table",
           id: row.ID,
           data: {
             "Name": field_0,
-      "Available": field_1,
-      "Gender": field_2
+      "Department": field_1
           }
         })
       });
@@ -105,7 +101,7 @@ const [field_2, setfield_2] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "Admin2Page_Table",
+          tableName: "Siddu23_Table",
           ids: selectedRows
         })
       });
@@ -120,8 +116,7 @@ const [field_2, setfield_2] = React.useState("");
   const handleRowClick = idx => {
     const row = tableData[idx];
     setfield_0(row["Name"] ?? "");
-    setfield_1(row["Available"] ?? "");
-    setfield_2(row["Gender"] ?? "");
+    setfield_1(row["Department"] ?? "");
     setEditingIndex(idx);
   };
 
@@ -153,7 +148,7 @@ const [field_2, setfield_2] = React.useState("");
 
       {/* Main Content */}
       <main className="flex-1 p-6 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-6 text-center">Admin2Page</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Siddu23</h1>
         <form className="flex flex-col gap-4 w-full max-w-2xl" onSubmit={e => e.preventDefault()}>
           
           <TextField
@@ -163,17 +158,10 @@ const [field_2, setfield_2] = React.useState("");
           />
         
           <Dropdown
-            label="Available"
+            label="Department"
             value={field_1}
             onChange={setfield_1}
-            options={["Yes","No"]}
-          />
-        
-          <Dropdown
-            label="Gender"
-            value={field_2}
-            onChange={setfield_2}
-            options={["Male","Female","Other","Don't want to disclose"]}
+            options={["MTO","BTP","QRA","SAP"]}
           />
         
           <div className="flex gap-2 justify-end mt-4">
@@ -198,7 +186,7 @@ const [field_2, setfield_2] = React.useState("");
             <thead>
               <tr>
                 <th className="p-2 border-b"></th>
-                <th className="p-2 border-b">Name</th><th className="p-2 border-b">Available</th><th className="p-2 border-b">Gender</th>
+                <th className="p-2 border-b">Name</th><th className="p-2 border-b">Department</th>
               </tr>
             </thead>
             <tbody>
@@ -218,7 +206,7 @@ const [field_2, setfield_2] = React.useState("");
                       }}
                     />
                   </td>
-                  <td className="p-2 border-b">{row["Name"]}</td><td className="p-2 border-b">{row["Available"]}</td><td className="p-2 border-b">{row["Gender"]}</td>
+                  <td className="p-2 border-b">{row["Name"]}</td><td className="p-2 border-b">{row["Department"]}</td>
                 </tr>
               ))}
             </tbody>

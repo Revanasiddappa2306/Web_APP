@@ -3,8 +3,8 @@ import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
 import DatePicker from "../../components/DatePicker";
 import { useState } from "react";
-import AboutPopup from "../../components/AboutPopup";
-import ContactPopup from "../../components/ContactPopup";
+import AboutPopup from "../../components/popups/AboutPopup";
+import ContactPopup from "../../components/popups/ContactPopup";
 import { useNavigate } from "react-router-dom";
 
 const GeneratedForm = () => {

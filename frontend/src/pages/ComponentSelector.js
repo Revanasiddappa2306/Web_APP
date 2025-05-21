@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { componentsLibrary } from "../components/componentsLibrary";
 import Button from "../components/Button1";
-import AboutPopup from "../components/AboutPopup";
-import ContactPopup from "../components/ContactPopup";  
+import AboutPopup from "../components/popups/AboutPopup";
+import ContactPopup from "../components/popups/ContactPopup";  
 
 const ComponentSelector = () => {
   const navigate = useNavigate();

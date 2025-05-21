@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import UserAssignPopup from "../UserAssignPopup";
+import UserAssignPopup from "../popups/UserAssignPopup";
 
 const UserTable = () => {
   const [users, setUsers] = useState([]);

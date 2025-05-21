@@ -3,8 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AboutPopup from "../components/AboutPopup";
-import ContactPopup from "../components/ContactPopup";
+import AboutPopup from "../components/popups/AboutPopup";
+import ContactPopup from "../components/popups/ContactPopup";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
