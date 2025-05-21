@@ -55,9 +55,20 @@ const Home = () => {
 
       {/* Main Content */}
       <main className="flex-1 bg-slate-100 flex flex-col items-center justify-center text-center px-4">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4">Hello there, welcome back!</h2>
-        <p className="text-lg text-gray-600 max-w-xl">
-          Please login using the dropdown above to continue. Select Admin or User login as per your role.
+        <h2 className="text-3xl font-semibold text-gray-800 mb-4">Welcome to Alcon Portal</h2>
+        <p className="text-lg text-gray-600 max-w-xl mb-6">
+          This is your one-stop platform for managing roles, accessing pages, and collaborating efficiently within the Alcon ecosystem.
+          <br /><br />
+          <span className="font-medium text-blue-900">Admins</span> can create and assign pages, manage users, and oversee all activities.<br />
+          <span className="font-medium text-blue-900">Users</span> can access their assigned roles and pages, and interact with the system as per their permissions.
+        </p>
+        <div className="mb-6">
+          <span className="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-base font-medium">
+            Please use the <span className="font-semibold">Login</span> button above to sign in as Admin or User.
+          </span>
+        </div>
+        <p className="text-gray-500 text-sm">
+          Need help? Use the <span className="underline">About</span> or <span className="underline">Contact</span> buttons in the menu.
         </p>
       </main>
 

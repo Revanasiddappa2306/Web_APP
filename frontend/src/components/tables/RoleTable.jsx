@@ -60,7 +60,7 @@ const RoleTable = () => {
         
  return(
   <div className="bg-white rounded shadow p-4 w-[45%] mr-[2%]">
-        <h2 className="text-center font-semibold text-gray-700 mb-4">Roles Management</h2>
+        <h2 className="text-center font-semibold text-gray-700 mb-4 bg-slate-200 p-2 rounded">Roles Management</h2>
      <div className="h-64 overflow-y-auto border rounded mb-4">
             <table className="table-auto w-full text-left border">
                 <thead className="bg-gray-200">

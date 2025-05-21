@@ -4,14 +4,34 @@ require("dotenv").config();
 
 const router = express.Router();
 /////////////////////////////// role-page assignment route ////////////////////////////////////////
-router.get('/role-page-assignments', async (req, res) => {
+// router.get('/role-page-assignments', async (req, res) => {
+//   try {
+//     const pool = await poolPromise;
+//     const result = await pool.request().query("SELECT PageID, RoleID FROM Alc_WebFramework.dbo.RolePageAssignments ");
+//     res.json(result.recordset);
+//   } catch (err) {
+//     console.error('Error fetching role-page assignments:', err);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+router.get("/role-page-assignments", async (req, res) => {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT PageID, RoleID FROM Alc_WebFramework.dbo.RolePageAssignments ");
+    const result = await pool.request().query(`
+      SELECT 
+        rpa.PageID, 
+        p.PageName, 
+        rpa.RoleID, 
+        r.Name
+      FROM Alc_WebFramework.dbo.RolePageAssignments rpa
+      JOIN Alc_WebFramework.dbo.Pages p ON rpa.PageID = p.PageID
+      JOIN Alc_WebFramework.dbo.Roles r ON rpa.RoleID = r.RoleID
+    `);
     res.json(result.recordset);
-  } catch (err) {
-    console.error('Error fetching role-page assignments:', err);
-    res.status(500).json({ error: 'Server error' });
+  } catch (error) {
+    console.error("❌ Error fetching role-page assignments:", error);
+    res.status(500).json({ message: "Failed to fetch assignments" });
   }
 });
 
