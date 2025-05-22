@@ -43,12 +43,7 @@ const ComponentSelector = () => {
             Alcon
           </h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
-            <button
-              onClick={handleBackToDashboard}
-              className="hover:text-yellow-300"
-            >
-              Home
-            </button>
+            <button onClick={handleBackToDashboard} className="hover:text-yellow-300"> Home </button>
             <button onClick={() => navigate("/your-pages")} className="hover:text-yellow-300">Pages</button>
             <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
             <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>

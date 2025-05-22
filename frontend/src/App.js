@@ -6,6 +6,7 @@ import ConfigureFields from "./pages/ConfigureFields";
 import YourPages from "./pages/YourPages";
 import Home from "./pages/Home";
 import DynamicGeneratedPageLoader from "./components/DynamicGeneratedPageLoader";
+import RequestsPage from "./pages/RequestsPage";
 
 export default function App() {
   return (
@@ -19,6 +20,8 @@ export default function App() {
         <Route path="/configure-fields" element={<ConfigureFields />} />
         <Route path="/your-pages" element={<YourPages />} />
         <Route path="/generated/:pageName" element={<DynamicGeneratedPageLoader />}/>
+        <Route path="/requests" element={<RequestsPage />} />
+        {/* Add more routes as needed */}
       </Routes>
     </Router>
   );

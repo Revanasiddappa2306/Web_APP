@@ -5,6 +5,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AboutPopup from "../components/popups/AboutPopup";
 import ContactPopup from "../components/popups/ContactPopup";
+import UserGuidePopup from "../components/popups/UserGuidePopup";
+import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline"; // or use any icon
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -13,8 +15,22 @@ const UserDashboard = () => {
   const [rolePages, setRolePages] = useState({});
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [hoveredRole, setHoveredRole] = useState(null);
   const hideTimeout = useRef();
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", window.location.pathname);
+
+    const handlePopState = () => {
+      navigate("/user-dashboard", { replace: true });
+      window.history.pushState(null, "", window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [navigate]);
 
   useEffect(() => {
     // Fetch roles assigned to this user
@@ -74,13 +90,24 @@ const UserDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 bg-slate-100 p-6">
+      <main className="flex-1 bg-slate-100 p-6 relative">
+        {/* Guide Icon Top Right */}
+        <button
+          type="button"
+          className="absolute top-6 right-8 text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+          onClick={() => setShowGuide(true)}
+          style={{ zIndex: 20 }}
+        >
+          <QuestionMarkCircleIcon className="h-6 w-6" />
+          <span className="hidden sm:inline font-medium">Guide</span>
+        </button>
         {/* User info top left */}
         <div className="mb-6">
           <span className="font-semibold text-lg text-blue-900">
             {user?.name} <span className="text-base text-gray-700">({user?.id})</span>
           </span>
         </div>
+        
         <div className="max-w-3xl mx-auto bg-white rounded shadow p-6">
           <h2 className="text-2xl font-semibold text-gray-700 mb-6">Your Roles</h2>
           <table className="min-w-full bg-white border border-gray-300 shadow">
@@ -151,6 +178,7 @@ const UserDashboard = () => {
       {/* Modal */}
       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
+      {showGuide && <UserGuidePopup onClose={() => setShowGuide(false)} />}
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center p-4 mt-auto shadow-inner">
