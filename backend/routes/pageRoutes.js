@@ -215,6 +215,7 @@ const GeneratedForm = () => {
   const [editingIndex, setEditingIndex] = React.useState(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [search, setSearch] = React.useState("");
   const navigate = useNavigate();
 
   const goHome = () => {
@@ -325,6 +326,12 @@ const GeneratedForm = () => {
     );
   };
 
+  const filteredTableData = tableData.filter(row =>
+    Object.values(row).some(
+      val => val && val.toString().toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900">
       {/* Navbar */}
@@ -349,24 +356,34 @@ const GeneratedForm = () => {
         <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
         <form className="flex flex-col gap-4 w-full max-w-2xl" onSubmit={e => e.preventDefault()}>
           ${inputsCode}
-          <div className="flex gap-2 justify-end mt-4">
-            <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg" >
-              Enter
-            </button>
-            <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
-              Update
-            </button>
-            <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
-              Delete
-            </button>
-            <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
-              Clear
-            </button>
-          </div>
+          <div className="flex justify-between items-center mt-4 mb-4 w-full max-w-2xl">
+  <div className="flex gap-2">
+    <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg" >
+      Enter
+    </button>
+    <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
+      Update
+    </button>
+    <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
+      Delete
+    </button>
+    <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
+      Clear
+    </button>
+  </div>
+  <input
+    type="text"
+    placeholder="Search..."
+    className="p-2 border rounded w-56"
+    value={search}
+    onChange={e => setSearch(e.target.value)}
+  />
+</div>
         </form>
         <hr className="my-6 w-full max-w-2xl border-t-2 border-gray-300" />
         {/* Data Table */}
         <div className="w-full max-w-2xl">
+          
           <table className="min-w-full bg-white border border-gray-300 shadow">
             <thead>
               <tr>
@@ -377,7 +394,7 @@ const GeneratedForm = () => {
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row, idx) => (
+              {filteredTableData.map((row, idx) => (
                 <tr
                   key={row.ID}
                   className="hover:bg-blue-100 cursor-pointer"

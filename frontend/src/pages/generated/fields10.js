@@ -1,7 +1,5 @@
 import React from "react";
 import TextField from "../../components/TextField";
-import Dropdown from "../../components/Dropdown";
-import DatePicker from "../../components/DatePicker";
 import { useState } from "react";
 import AboutPopup from "../../components/popups/AboutPopup";
 import ContactPopup from "../../components/popups/ContactPopup";
@@ -12,6 +10,12 @@ const GeneratedForm = () => {
 const [field_1, setfield_1] = React.useState("");
 const [field_2, setfield_2] = React.useState("");
 const [field_3, setfield_3] = React.useState("");
+const [field_4, setfield_4] = React.useState("");
+const [field_5, setfield_5] = React.useState("");
+const [field_6, setfield_6] = React.useState("");
+const [field_7, setfield_7] = React.useState("");
+const [field_8, setfield_8] = React.useState("");
+const [field_9, setfield_9] = React.useState("");
 
   
   const [tableData, setTableData] = React.useState([]);
@@ -19,6 +23,7 @@ const [field_3, setfield_3] = React.useState("");
   const [editingIndex, setEditingIndex] = React.useState(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [search, setSearch] = React.useState("");
   const navigate = useNavigate();
 
   const goHome = () => {
@@ -38,10 +43,10 @@ const [field_3, setfield_3] = React.useState("");
     fetch("http://localhost:5000/api/tables/get-table-data", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tableName: "TestPage01_Table" })
+      body: JSON.stringify({ tableName: "fields10_Table" })
     })
       .then(res => res.json())
-      .then (data => setTableData(data.rows || []));
+      .then(data => setTableData(data.rows || []));
   }, []);
 
   // Helper: clear form fields
@@ -50,6 +55,12 @@ const [field_3, setfield_3] = React.useState("");
     setfield_1("");
     setfield_2("");
     setfield_3("");
+    setfield_4("");
+    setfield_5("");
+    setfield_6("");
+    setfield_7("");
+    setfield_8("");
+    setfield_9("");
     setEditingIndex(null);
   };
 
@@ -60,12 +71,18 @@ const [field_3, setfield_3] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "TestPage01_Table",
+          tableName: "fields10_Table",
           data: {
-            "Name": field_0,
-      "Department": field_1,
-      "Shift": field_2,
-      "Date": field_3
+            "f1": field_0,
+      "f2": field_1,
+      "f3": field_2,
+      "f4": field_3,
+      "f5": field_4,
+      "f6f": field_5,
+      "f7": field_6,
+      "f8": field_7,
+      "f9": field_8,
+      "f10": field_9
           }
         })
       });
@@ -85,13 +102,19 @@ const [field_3, setfield_3] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "TestPage01_Table",
+          tableName: "fields10_Table",
           id: row.ID,
           data: {
-            "Name": field_0,
-      "Department": field_1,
-      "Shift": field_2,
-      "Date": field_3
+            "f1": field_0,
+      "f2": field_1,
+      "f3": field_2,
+      "f4": field_3,
+      "f5": field_4,
+      "f6f": field_5,
+      "f7": field_6,
+      "f8": field_7,
+      "f9": field_8,
+      "f10": field_9
           }
         })
       });
@@ -110,7 +133,7 @@ const [field_3, setfield_3] = React.useState("");
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tableName: "TestPage01_Table",
+          tableName: "fields10_Table",
           ids: selectedRows
         })
       });
@@ -124,10 +147,16 @@ const [field_3, setfield_3] = React.useState("");
   // Row click: load data into fields
   const handleRowClick = idx => {
     const row = tableData[idx];
-    setfield_0(row["Name"] ?? "");
-    setfield_1(row["Department"] ?? "");
-    setfield_2(row["Shift"] ?? "");
-    setfield_3(row["Date"] ?? "");
+    setfield_0(row["f1"] ?? "");
+    setfield_1(row["f2"] ?? "");
+    setfield_2(row["f3"] ?? "");
+    setfield_3(row["f4"] ?? "");
+    setfield_4(row["f5"] ?? "");
+    setfield_5(row["f6f"] ?? "");
+    setfield_6(row["f7"] ?? "");
+    setfield_7(row["f8"] ?? "");
+    setfield_8(row["f9"] ?? "");
+    setfield_9(row["f10"] ?? "");
     setEditingIndex(idx);
   };
 
@@ -137,6 +166,12 @@ const [field_3, setfield_3] = React.useState("");
       prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
     );
   };
+
+  const filteredTableData = tableData.filter(row =>
+    Object.values(row).some(
+      val => val && val.toString().toLowerCase().includes(search.toLowerCase())
+    )
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900">
@@ -159,62 +194,106 @@ const [field_3, setfield_3] = React.useState("");
 
       {/* Main Content */}
       <main className="flex-1 p-6 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-6 text-center">TestPage01</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">fields10</h1>
         <form className="flex flex-col gap-4 w-full max-w-2xl" onSubmit={e => e.preventDefault()}>
           
           <TextField
-            label="Name"
+            label="f1"
             value={field_0}
             onChange={setfield_0}
           />
         
-          <Dropdown
-            label="Department"
+          <TextField
+            label="f2"
             value={field_1}
             onChange={setfield_1}
-            options={["MTO","BTP","QRA","SAP"]}
           />
         
-          <Dropdown
-            label="Shift"
+          <TextField
+            label="f3"
             value={field_2}
             onChange={setfield_2}
-            options={["Morning","Afternoon","Night"]}
           />
         
-          <DatePicker
-            label="Date"
+          <TextField
+            label="f4"
             value={field_3}
             onChange={setfield_3}
           />
         
-          <div className="flex gap-2 justify-end mt-4">
-            <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg" >
-              Enter
-            </button>
-            <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
-              Update
-            </button>
-            <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
-              Delete
-            </button>
-            <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
-              Clear
-            </button>
-          </div>
+          <TextField
+            label="f5"
+            value={field_4}
+            onChange={setfield_4}
+          />
+        
+          <TextField
+            label="f6f"
+            value={field_5}
+            onChange={setfield_5}
+          />
+        
+          <TextField
+            label="f7"
+            value={field_6}
+            onChange={setfield_6}
+          />
+        
+          <TextField
+            label="f8"
+            value={field_7}
+            onChange={setfield_7}
+          />
+        
+          <TextField
+            label="f9"
+            value={field_8}
+            onChange={setfield_8}
+          />
+        
+          <TextField
+            label="f10"
+            value={field_9}
+            onChange={setfield_9}
+          />
+        
+          <div className="flex justify-between items-center mt-4 mb-4 w-full max-w-2xl">
+  <div className="flex gap-2">
+    <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg" >
+      Enter
+    </button>
+    <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
+      Update
+    </button>
+    <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
+      Delete
+    </button>
+    <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
+      Clear
+    </button>
+  </div>
+  <input
+    type="text"
+    placeholder="Search..."
+    className="p-2 border rounded w-56"
+    value={search}
+    onChange={e => setSearch(e.target.value)}
+  />
+</div>
         </form>
         <hr className="my-6 w-full max-w-2xl border-t-2 border-gray-300" />
         {/* Data Table */}
         <div className="w-full max-w-2xl">
+          
           <table className="min-w-full bg-white border border-gray-300 shadow">
             <thead>
               <tr>
                 <th className="p-2 border-b"></th>
-                <th className="p-2 border-b">Name</th><th className="p-2 border-b">Department</th><th className="p-2 border-b">Shift</th><th className="p-2 border-b">Date</th>
+                <th className="p-2 border-b">f1</th><th className="p-2 border-b">f2</th><th className="p-2 border-b">f3</th><th className="p-2 border-b">f4</th><th className="p-2 border-b">f5</th><th className="p-2 border-b">f6f</th><th className="p-2 border-b">f7</th><th className="p-2 border-b">f8</th><th className="p-2 border-b">f9</th><th className="p-2 border-b">f10</th>
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row, idx) => (
+              {filteredTableData.map((row, idx) => (
                 <tr
                   key={row.ID}
                   className="hover:bg-blue-100 cursor-pointer"
@@ -230,7 +309,7 @@ const [field_3, setfield_3] = React.useState("");
                       }}
                     />
                   </td>
-                  <td className="p-2 border-b">{row["Name"]}</td><td className="p-2 border-b">{row["Department"]}</td><td className="p-2 border-b">{row["Shift"]}</td><td className="p-2 border-b">{row["Date"] ? new Date(row["Date"]).toLocaleDateString() : ""}</td>
+                  <td className="p-2 border-b">{row["f1"]}</td><td className="p-2 border-b">{row["f2"]}</td><td className="p-2 border-b">{row["f3"]}</td><td className="p-2 border-b">{row["f4"]}</td><td className="p-2 border-b">{row["f5"]}</td><td className="p-2 border-b">{row["f6f"]}</td><td className="p-2 border-b">{row["f7"]}</td><td className="p-2 border-b">{row["f8"]}</td><td className="p-2 border-b">{row["f9"]}</td><td className="p-2 border-b">{row["f10"]}</td>
                 </tr>
               ))}
             </tbody>
