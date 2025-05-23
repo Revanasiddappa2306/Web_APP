@@ -97,7 +97,16 @@ const AdminDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 bg-slate-100 p-6 space-y-12">
+      <main
+        className="flex-1 bg-slate-100 p-6 space-y-12"
+        // style={{
+        //   backgroundImage: "url('/assets/bg-image.jpeg'), url('/assets/bg-image-rotated.jpeg')",
+        //   backgroundSize: "1300px 750px, 1300px 750px",
+        //   backgroundPosition: "top right , bottom right",
+        //   backgroundRepeat: "no-repeat, no-repeat",
+        // }}
+        
+      >
         {/* Admin info top left */}
         <div className="mb-6">
           <span className="font-semibold text-lg text-blue-900">
