@@ -57,4 +57,20 @@ router.get("/unread-count", async (req, res) => {
   }
 });
 
+router.post("/update-status/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const pool = await poolPromise;
+    await pool.request().query(`
+      UPDATE Alc_WebFramework.dbo.Requirements
+      SET Status = '${status}'
+      WHERE RequirementID = ${id}
+    `);
+    res.json({ message: "Status updated" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update status" });
+  }
+});
+
 module.exports = router;

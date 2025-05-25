@@ -84,7 +84,7 @@ const AdminDashboard = () => {
          
             <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
             <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
-            <button onClick={() => navigate("/requests")} className="relative hover:underline">
+            <button onClick={() => window.open("/requests", "_blank")} className="relative hover:underline">
               Requests
               {unreadCount > 0 && (
                 <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">

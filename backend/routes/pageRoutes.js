@@ -79,7 +79,7 @@ router.post("/generate-form", (req, res) => {
           .input("PageID", sql.VarChar, PageID)
           .query(`DELETE FROM PageDataTables WHERE PageID = @PageID`);
   
-        // Drop the dynamic page table (e.g., Siddu2306_table)
+        // Drop the dynamic page
         const tableName = `[${PageName}_table]`;
         await pool.request().query(`IF OBJECT_ID('${tableName}', 'U') IS NOT NULL DROP TABLE ${tableName}`);
       }
@@ -112,9 +112,9 @@ router.post("/generate-form", (req, res) => {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   function generateComponentCode(fieldConfigs, pageName) {
     let stateDeclarations = '';
-    let inputsCode = '';
     const usedComponents = new Set();
 
+    // First loop: only for state and usedComponents
     Object.entries(fieldConfigs).forEach(([key, config], index) => {
       const label = config.label || `Field${index + 1}`;
       const stateKey = `field_${index}`;
@@ -122,65 +122,92 @@ router.post("/generate-form", (req, res) => {
 
       stateDeclarations += `const [${stateKey}, set${stateKey}] = React.useState("");\n`;
 
+      if (type === "Dropdown") usedComponents.add("Dropdown");
+      else if (type === "Checkbox") usedComponents.add("Checkbox");
+      else if (type === "DatePicker" || type === "Date") usedComponents.add("DatePicker");
+      else if (type === "NumberInput" || type === "Number") usedComponents.add("NumberInput");
+      else if (type === "TextField" || type === "Text") usedComponents.add("TextField");
+    });
+
+    // Second loop: build formFields string
+    let formFields = "";
+    Object.entries(fieldConfigs).forEach(([key, config], index) => {
+      const label = config.label || `Field${index + 1}`;
+      const stateKey = `field_${index}`;
+      const type = config.type || key.split("-")[0];
+
       if (type === "Dropdown") {
-        usedComponents.add("Dropdown");
-        inputsCode += `
-          <Dropdown
-            label="${label}"
-            value={${stateKey}}
-            onChange={set${stateKey}}
-            options={${JSON.stringify(config.options || [])}}
-          />
+        formFields += `
+          <div key="${key}-${index}">
+            <Dropdown
+              label="${label}"
+              value={${stateKey}}
+              onChange={set${stateKey}}
+              options={${JSON.stringify(config.options || [])}}
+            />
+          </div>
         `;
       } else if (type === "Checkbox") {
-        usedComponents.add("Checkbox");
-        inputsCode += `
-          <Checkbox
-            label="${label}${config.condition ? ` (${config.condition})` : ""}"
-            checked={${stateKey}}
-            onChange={set${stateKey}}
-          />
+        formFields += `
+          <div key="${key}-${index}">
+            <Checkbox
+              label="${label}${config.condition ? ` (${config.condition})` : ""}"
+              checked={${stateKey}}
+              onChange={set${stateKey}}
+            />
+          </div>
         `;
       } else if (type === "DatePicker" || type === "Date") {
-        usedComponents.add("DatePicker");
-        inputsCode += `
-          <DatePicker
-            label="${label}"
-            value={${stateKey}}
-            onChange={set${stateKey}}
-          />
+        formFields += `
+          <div key="${key}-${index}">
+            <DatePicker
+              label="${label}"
+              value={${stateKey}}
+              onChange={set${stateKey}}
+            />
+          </div>
         `;
       } else if (type === "NumberInput" || type === "Number") {
-        usedComponents.add("NumberInput");
-        inputsCode += `
-          <NumberInput
-            label="${label}"
-            value={${stateKey}}
-            onChange={set${stateKey}}
-          />
+        formFields += `
+          <div key="${key}-${index}">
+            <NumberInput
+              label="${label}"
+              value={${stateKey}}
+              onChange={set${stateKey}}
+            />
+          </div>
         `;
       } else if (type === "TextField" || type === "Text") {
-        usedComponents.add("TextField");
-        inputsCode += `
-          <TextField
-            label="${label}"
-            value={${stateKey}}
-            onChange={set${stateKey}}
-          />
+        formFields += `
+          <div key="${key}-${index}">
+            <TextField
+              label="${label}"
+              value={${stateKey}}
+              onChange={set${stateKey}}
+            />
+          </div>
         `;
       } else {
-        // Default: text input
-        inputsCode += `
-          <input
-            type="text"
-            className="p-2 border rounded mb-2"
-            placeholder="${label}"
-            value={${stateKey}}
-            onChange={(e) => set${stateKey}(e.target.value)}
-          />
+        formFields += `
+          <div key="${key}-${index}">
+            <input
+              type="text"
+              className="p-2 border rounded mb-2 w-full"
+              placeholder="${label}"
+              value={${stateKey}}
+              onChange={(e) => set${stateKey}(e.target.value)}
+            />
+          </div>
         `;
       }
     });
+
+    // Now wrap in grid
+    const inputsCode = `
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        ${formFields}
+      </div>
+    `;
 
     // Generate import statements
     const importMap = {
@@ -354,75 +381,81 @@ const GeneratedForm = () => {
       {/* Main Content */}
       <main className="flex-1 p-6 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
-        <form className="flex flex-col gap-4 w-full max-w-2xl" onSubmit={e => e.preventDefault()}>
+        <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
           ${inputsCode}
-          <div className="flex justify-between items-center mt-4 mb-4 w-full max-w-2xl">
-  <div className="flex gap-2">
-    <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg" >
-      Enter
-    </button>
-    <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
-      Update
-    </button>
-    <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
-      Delete
-    </button>
-    <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
-      Clear
-    </button>
+          <div className="flex justify-between items-center mt-4 mb-4 w-full">
+    {/* Left: Empty */}
+    <div className="w-1/3"></div>
+    {/* Center: Buttons */}
+    <div className="flex gap-10 justify-center w-1/3">
+      <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg">
+        Enter
+      </button>
+      <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
+        Update
+      </button>
+      <button type="button" onClick={handleDelete} className="bg-red-600 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={selectedRows.length === 0}>
+        Delete
+      </button>
+      <button type="button" onClick={clearFields} className="bg-gray-400 text-white py-2 px-6 rounded text-sm shadow-lg">
+        Clear
+      </button>
+    </div>
+    {/* Right: Search */}
+    <div className="w-1/3 flex justify-end">
+      <input
+        type="text"
+        placeholder="Search..."
+        className="p-2 border rounded w-56"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+    </div>
   </div>
-  <input
-    type="text"
-    placeholder="Search..."
-    className="p-2 border rounded w-56"
-    value={search}
-    onChange={e => setSearch(e.target.value)}
-  />
-</div>
         </form>
-        <hr className="my-6 w-full max-w-2xl border-t-2 border-gray-300" />
+        <hr className="my-6 w-full border-t-2 border-gray-300" />
         {/* Data Table */}
-        <div className="w-full max-w-2xl">
-          
-          <table className="min-w-full bg-white border border-gray-300 shadow">
-            <thead>
-              <tr>
-                <th className="p-2 border-b"></th>
-                ${Object.entries(fieldConfigs).map(([_, config]) =>
-                  `<th className="p-2 border-b">${config.label}</th>`
-                ).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTableData.map((row, idx) => (
-                <tr
-                  key={row.ID}
-                  className="hover:bg-blue-100 cursor-pointer"
-                  onClick={() => handleRowClick(idx)}
-                >
-                  <td className="p-2 border-b text-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(row.ID)}
-                      onChange={e => {
-                        e.stopPropagation();
-                        handleSelectRow(row.ID);
-                      }}
-                    />
-                  </td>
-                  ${Object.entries(fieldConfigs).map(([_, config]) => {
-                    const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
-                    // If this is a Date field, format it
-                    if ((config.type || "").toLowerCase().includes("date")) {
-                      return `<td className="p-2 border-b">{row["${fieldName}"] ? new Date(row["${fieldName}"]).toLocaleDateString() : ""}</td>`;
-                    }
-                    return `<td className="p-2 border-b">{row["${fieldName}"]}</td>`;
-                  }).join("")}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <div className="w-full max-w-full overflow-x-auto mb-6">
+  <div className="w-full overflow-x-auto">
+    <table className="max-w-full bg-white border border-gray-300 shadow" style={{ minWidth: "${Object.keys(fieldConfigs).length * 180 + 60}px" }}>
+      <thead>
+        <tr>
+          <th className="p-2 border-b min-w-[60px]"></th>
+          ${Object.entries(fieldConfigs).map(([_, config]) =>
+            `<th className="p-2 border-b min-w-[180px]">${config.label}</th>`
+          ).join("")}
+        </tr>
+      </thead>
+      <tbody>
+        {filteredTableData.map((row, idx) => (
+          <tr
+            key={row.ID}
+            className="hover:bg-blue-100 cursor-pointer"
+            onClick={() => handleRowClick(idx)}
+          >
+            <td className="p-2 border-b text-center min-w-[60px]">
+              <input
+                type="checkbox"
+                checked={selectedRows.includes(row.ID)}
+                onChange={e => {
+                  e.stopPropagation();
+                  handleSelectRow(row.ID);
+                }}
+              />
+            </td>
+            ${Object.entries(fieldConfigs).map(([_, config], index) => {
+              const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
+              if ((config.type || "").toLowerCase().includes("date")) {
+                return `<td className="p-2 border-b min-w-[180px]">{row["${fieldName}"] ? new Date(row["${fieldName}"]).toLocaleDateString() : ""}</td>`;
+              }
+              return `<td className="p-2 border-b min-w-[180px]">{row["${fieldName}"]}</td>`;
+            }).join("")}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
       </main>
        {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
        {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
