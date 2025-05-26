@@ -10,7 +10,7 @@ const HomeGuidePopup = ({ onClose }) => (
         className="absolute top-2 right-2 text-xl text-gray-700 hover:text-red-500"
         onClick={onClose}
       >×</button>
-      <h2 className="text-xl font-semibold mb-4 text-center">Home Page Guide</h2>
+      <h2 className="text-xl font-bold mb-4 text-center text-alconBlue">Home Page Guide</h2>
       <div className="text-gray-700 space-y-5">
         <div>
           <strong>Home Page Overview:</strong>

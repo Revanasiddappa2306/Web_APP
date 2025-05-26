@@ -18,7 +18,7 @@ const RequestsPopup = ({ onClose }) => {
             className="absolute top-2 right-2 text-xl text-gray-700 hover:text-red-500"
             onClick={onClose}
           >×</button>
-          <h2 className="text-xl font-semibold mb-4">Requests</h2>
+          <h2 className="text-xl font-bold mb-4 text-alconBlue">Requests</h2>
           <p>No requests found.</p>
         </div>
       </div>
@@ -34,7 +34,7 @@ const RequestsPopup = ({ onClose }) => {
           className="absolute top-2 right-2 text-xl text-gray-700 hover:text-red-500"
           onClick={onClose}
         >×</button>
-        <h2 className="text-xl font-semibold mb-4">Requests</h2>
+        <h2 className="text-xl font-bold mb-4 text-alconBlue">Requests</h2>
         <div className="mb-4">
           <strong>Name:</strong> {req.Name}<br />
           <strong>521ID:</strong> {req["521ID"]}<br />

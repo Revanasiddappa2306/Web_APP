@@ -34,6 +34,10 @@ const YourPages = () => {
     );
   };
 
+  const handleCreatePage = () => {
+    navigate("/component-selector");
+  };
+
   const handleDeleteSelected = async () => {
     if (selectedPages.length === 0) return;
 
@@ -64,11 +68,12 @@ const YourPages = () => {
         <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/admin-dashboard")}>
             {/* <img src={AlconLogo} alt="Alcon Logo" className="h-10 w-10 rounded-full" /> */}
-            <span className="text-2xl font-bold">Alcon</span>
+            <span className="text-3xl font-bold">Alcon</span>
           </div>
 
-          <nav className="flex gap-6 text-lg">
-            <button onClick={() => navigate("/admin-dashboard")}  className="hover:text-yellow-300" > Home </button>
+          <nav className="flex gap-6 text-lg font-medium">
+            <button onClick={() => navigate("/admin-dashboard")} className="hover:text-yellow-300">Home</button>
+            <button onClick={handleCreatePage} className="hover:text-yellow-300">Create Page</button>
             <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
             <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
           </nav>
@@ -76,7 +81,14 @@ const YourPages = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 bg-white">
+      <main className="flex-1 p-6 bg-white"
+      //  style={{
+      //   backgroundImage: "url('/assets/bg_image.jpeg')",
+      //   backgroundSize: "1300px 750px",
+      //   backgroundPosition: "top right",
+      //   backgroundRepeat: "repeat",
+      // }}
+      >
         <h1 className="text-2xl font-bold mb-4">Your Generated Pages</h1>
 
         {pages.length === 0 ? (

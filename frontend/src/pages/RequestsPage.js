@@ -127,7 +127,7 @@ const RequestsPage = () => {
             >
               &times;
             </button>
-            <h3 className="text-xl font-bold mb-4">{popupHeading}</h3> {/* Use popupHeading here */}
+            <h3 className="text-xl font-bold mb-4 text-center text-alconBlue">{popupHeading}</h3> {/* Use popupHeading here */}
             <div className="mb-4 whitespace-pre-line">{popupContent}</div>
           </div>
         </div>

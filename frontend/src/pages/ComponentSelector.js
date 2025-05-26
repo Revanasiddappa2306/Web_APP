@@ -5,12 +5,15 @@ import { componentsLibrary } from "../components/componentsLibrary";
 import Button from "../components/Button1";
 import AboutPopup from "../components/popups/AboutPopup";
 import ContactPopup from "../components/popups/ContactPopup";  
+import PageCreationGuidePopup from "../components/popups/PageCreationGuidePopup";
+import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
 const ComponentSelector = () => {
   const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState({});
+  const [showGuide, setShowGuide] = useState(false);
 
   const handleQuantityChange = (componentName, quantity) => {
     setSelectedComponents((prev) => ({
@@ -52,7 +55,18 @@ const ComponentSelector = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 bg-gray-100 text-gray-900 p-6">
+      <main className="flex-1 bg-gray-100 text-gray-900 p-6 relative">
+        {/* Guide Button Top Right */}
+        <button
+          type="button"
+          className="absolute top-6 right-8 text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+          onClick={() => setShowGuide(true)}
+          style={{ zIndex: 20 }}
+        >
+          <QuestionMarkCircleIcon className="h-6 w-6" />
+          <span className="hidden sm:inline font-medium">Guide</span>
+        </button>
+
         <h1 className="text-2xl font-bold mb-6 text-center">
           Select Components
         </h1>
@@ -97,6 +111,7 @@ const ComponentSelector = () => {
       {/* Modal */}
       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
+      {showGuide && <PageCreationGuidePopup onClose={() => setShowGuide(false)} />}  
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">

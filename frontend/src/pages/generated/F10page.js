@@ -286,8 +286,8 @@ const [field_9, setfield_9] = React.useState("");
   <div className="w-1/3"></div>
   {/* Center: Buttons */}
   <div className="flex gap-10 justify-center w-1/3">
-    <button type="button" onClick={handleEnter} className="bg-blue-500 text-white py-2 px-6 rounded text-sm shadow-lg">
-      Enter
+    <button type="button" onClick={handleEnter} className="bg-green-500 text-white py-2 px-6 rounded text-sm shadow-lg">
+      Insert
     </button>
     <button type="button" onClick={handleUpdate} className="bg-yellow-500 text-white py-2 px-6 rounded text-sm shadow-lg" disabled={editingIndex === null}>
       Update
@@ -320,7 +320,7 @@ const [field_9, setfield_9] = React.useState("");
     <thead>
       <tr>
         <th className="p-2 border-b min-w-[60px]"></th>
-        <th className="p-2 border-b min-w-[180px]">f1</th><th className="p-2 border-b min-w-[180px]">f2</th><th className="p-2 border-b min-w-[180px]">f3</th><th className="p-2 border-b min-w-[180px]">f4</th><th className="p-2 border-b min-w-[180px]">f5</th><th className="p-2 border-b min-w-[180px]">f6</th><th className="p-2 border-b min-w-[180px]">f7</th><th className="p-2 border-b min-w-[180px]">f8</th><th className="p-2 border-b min-w-[180px]">f9</th><th className="p-2 border-b min-w-[180px]">f10</th>
+        <th className="p-2 border-b min-w-[150px]">f1</th><th className="p-2 border-b min-w-[150px]">f2</th><th className="p-2 border-b min-w-[150px]">f3</th><th className="p-2 border-b min-w-[150px]">f4</th><th className="p-2 border-b min-w-[150px]">f5</th><th className="p-2 border-b min-w-[150px]">f6</th><th className="p-2 border-b min-w-[150px]">f7</th><th className="p-2 border-b min-w-[150px]">f8</th><th className="p-2 border-b min-w-[150px]">f9</th><th className="p-2 border-b min-w-[150px]">f10</th>
       </tr>
     </thead>
     <tbody>
@@ -340,7 +340,7 @@ const [field_9, setfield_9] = React.useState("");
               }}
             />
           </td>
-          <td className="p-2 border-b min-w-[180px]">{row["f1"]}</td><td className="p-2 border-b min-w-[180px]">{row["f2"]}</td><td className="p-2 border-b min-w-[180px]">{row["f3"]}</td><td className="p-2 border-b min-w-[180px]">{row["f4"]}</td><td className="p-2 border-b min-w-[180px]">{row["f5"]}</td><td className="p-2 border-b min-w-[180px]">{row["f6"]}</td><td className="p-2 border-b min-w-[180px]">{row["f7"]}</td><td className="p-2 border-b min-w-[180px]">{row["f8"]}</td><td className="p-2 border-b min-w-[180px]">{row["f9"]}</td><td className="p-2 border-b min-w-[180px]">{row["f10"]}</td>
+          <td className="p-2 border-b min-w-[150px]">{row["f1"]}</td><td className="p-2 border-b min-w-[150px]">{row["f2"]}</td><td className="p-2 border-b min-w-[150px]">{row["f3"]}</td><td className="p-2 border-b min-w-[150px]">{row["f4"]}</td><td className="p-2 border-b min-w-[150px]">{row["f5"]}</td><td className="p-2 border-b min-w-[150px]">{row["f6"]}</td><td className="p-2 border-b min-w-[150px]">{row["f7"]}</td><td className="p-2 border-b min-w-[150px]">{row["f8"]}</td><td className="p-2 border-b min-w-[150px]">{row["f9"]}</td><td className="p-2 border-b min-w-[150px]">{row["f10"]}</td>
         </tr>
       ))}
     </tbody>

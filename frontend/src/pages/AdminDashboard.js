@@ -9,7 +9,6 @@ import RoleTable from "../components/tables/RoleTable";
 import UserTable from "../components/tables/UserTable";
 import RolePageAssignmentsTable from "../components/tables/RolePageAssignmentsTable";
 import UserRoleAssignmentsTable from "../components/tables/UserRoleAssignmentsTable";
-import RequestsPopup from "../components/popups/RequestsPopup";
 import AdminGuidePopup from "../components/popups/AdminGuidePopup";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
@@ -18,7 +17,6 @@ const AdminDashboard = () => {
   const admin = JSON.parse(localStorage.getItem("admin")); // { name, id }
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
-  const [showRequests, setShowRequests] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showGuide, setShowGuide] = useState(false);
 
@@ -100,7 +98,7 @@ const AdminDashboard = () => {
       <main
         className="flex-1 bg-slate-100 p-6 space-y-12"
         // style={{
-        //   backgroundImage: "url('/assets/bg-image.jpeg'), url('/assets/bg-image-rotated.jpeg')",
+        //   backgroundImage: "url('/assets/bg_image.jpeg'), url('/assets/bg_image.jpeg')",
         //   backgroundSize: "1300px 750px, 1300px 750px",
         //   backgroundPosition: "top right , bottom right",
         //   backgroundRepeat: "no-repeat, no-repeat",
@@ -137,7 +135,6 @@ const AdminDashboard = () => {
        {/* Modal */}
        {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
        {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
-       {showRequests && <RequestsPopup onClose={() => setShowRequests(false)} />}
        {showGuide && <AdminGuidePopup onClose={() => setShowGuide(false)} />}
       
 

@@ -29,7 +29,7 @@ const RequirementPopup = ({ onClose, onSubmit }) => {
           className="absolute top-2 right-2 text-xl text-gray-700 hover:text-red-500"
           onClick={onClose}
         >×</button>
-        <h2 className="text-xl font-semibold mb-4">Submit Requirement</h2>
+        <h2 className="text-xl font-bold mb-4 text-alconBlue text-center">Submit Requirement</h2>
         <form onSubmit={handleSubmit}>
           <div className="flex gap-4 mb-3">
             <input

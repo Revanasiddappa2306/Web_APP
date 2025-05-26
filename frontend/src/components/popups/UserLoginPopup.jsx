@@ -25,7 +25,7 @@ export default function UserLogin({ onClose }) {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Login Successful 👍🫡", {
+        toast.success("Login Successful 👍", {
           position: "top-center",
           autoClose: 1500,
         });
