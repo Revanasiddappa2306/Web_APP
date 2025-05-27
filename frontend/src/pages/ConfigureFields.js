@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-// import Button from "../components/Button1";
 import AboutPopup from "../components/popups/AboutPopup";
 import ContactPopup from "../components/popups/ContactPopup";
+import PreviewPage from "../pages/PreviewPage";
 
 const ConfigureFields = () => {
   const location = useLocation();
@@ -11,8 +11,20 @@ const ConfigureFields = () => {
   const [showContact, setShowContact] = useState(false);
   const [isCompiling, setIsCompiling] = useState(false);
   const selectedComponents = location.state?.selectedComponents || {};
+
+  // Build initial field order
+  const initialFieldOrder = [];
+  Object.entries(selectedComponents).forEach(([key, value]) => {
+    const quantity = value.quantity || 0;
+    for (let i = 0; i < quantity; i++) {
+      initialFieldOrder.push(`${key}-${i}`);
+    }
+  });
+  const [fieldOrder] = useState(initialFieldOrder);
   const [fieldConfigs, setFieldConfigs] = useState({});
   const [customPageName, setCustomPageName] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewFieldOrder, setPreviewFieldOrder] = useState(fieldOrder); // or initial order
 
   const admin = JSON.parse(localStorage.getItem("admin")); // <-- Add this line
 
@@ -29,7 +41,17 @@ const ConfigureFields = () => {
     }));
   };
 
-  const handleFinish = async () => {
+  const handlePreview = () => {
+    setPreviewFieldOrder(fieldOrder);
+    setShowPreview(true);
+  };
+
+  const handleFinish = async (finalOrder) => {
+    const orderedFieldConfigs = {};
+    finalOrder.forEach((key) => {
+      orderedFieldConfigs[key] = fieldConfigs[key];
+    });
+
     if (!customPageName.trim()) {
       alert("Please enter a custom page name.");
       return;
@@ -37,7 +59,7 @@ const ConfigureFields = () => {
     const cleanPageName = customPageName.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");;
     const payload = {
       pageName: cleanPageName,
-      fieldConfigs,
+      fieldConfigs: orderedFieldConfigs,
     };
 
     try {
@@ -83,7 +105,7 @@ const ConfigureFields = () => {
             body: JSON.stringify({
               pageName: customPageName,
               pageId: saveResult.PageID,
-              fieldConfigs,
+              fieldConfigs: orderedFieldConfigs,
             }),
           });
 
@@ -233,18 +255,22 @@ const ConfigureFields = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-4">
-          <button
-            onClick={handleFinish}
-            className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded text-sm"
-          >
-            Submit Config
-          </button>
-          <button
-            onClick={() => navigate("/component-selector")}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded text-sm"
-          >
-            Back to Component Selector
-          </button>
+          {!showPreview ? (
+            <button
+              onClick={handlePreview}
+              className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded text-sm"
+            >
+              Submit Config
+            </button>
+          ) : (
+            <PreviewPage
+              fieldConfigs={fieldConfigs}
+              fieldOrder={previewFieldOrder}
+              setFieldOrder={setPreviewFieldOrder}
+              onGenerate={handleFinish}
+              customPageName={customPageName}
+            />
+          )}
         </div>
       </main>
 

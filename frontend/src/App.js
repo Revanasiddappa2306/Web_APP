@@ -7,6 +7,7 @@ import YourPages from "./pages/YourPages";
 import Home from "./pages/Home";
 import DynamicGeneratedPageLoader from "./components/DynamicGeneratedPageLoader";
 import RequestsPage from "./pages/RequestsPage";
+import PreviewPage from "./pages/PreviewPage";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/your-pages" element={<YourPages />} />
         <Route path="/generated/:pageName" element={<DynamicGeneratedPageLoader />}/>
         <Route path="/requests" element={<RequestsPage />} />
+        <Route path="/preview" element={<PreviewPage />} />
         {/* Add more routes as needed */}
       </Routes>
     </Router>
