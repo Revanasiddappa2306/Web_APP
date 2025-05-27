@@ -34,7 +34,7 @@ const ConfigureFields = () => {
       alert("Please enter a custom page name.");
       return;
     }
-    const cleanPageName = customPageName.trim().replace(/\s+/g, "_");
+    const cleanPageName = customPageName.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");;
     const payload = {
       pageName: cleanPageName,
       fieldConfigs,

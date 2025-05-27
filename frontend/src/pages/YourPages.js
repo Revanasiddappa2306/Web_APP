@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import AboutPopup from "../components/popups/AboutPopup";
 import ContactPopup from "../components/popups/ContactPopup";
 
@@ -53,8 +55,16 @@ const YourPages = () => {
       if (res.ok) {
         setPages((prev) => prev.filter((p) => !selectedPages.includes(p)));
         setSelectedPages([]);
+        toast.success("Selected pages deleted successfully!", { autoClose: 2000 });
       } else {
-        console.error("❌ Failed to delete pages");
+        const data = await res.json();
+        if (data.assignedPages && data.assignedPages.length > 0) {
+          alert(
+            `Page(s) assigned to some role: ${data.assignedPages.join(", ")}.\nPlease remove assignments before deleting.`
+          );
+        } else {
+          console.error("❌ Failed to delete pages");
+        }
       }
     } catch (err) {
       console.error("❌ Error deleting pages:", err);
@@ -157,6 +167,7 @@ const YourPages = () => {
       <footer className="bg-alconBlue text-white text-center p-4">
         <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
       </footer>
+      <ToastContainer />
     </div>
   );
 };

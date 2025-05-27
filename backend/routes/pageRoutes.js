@@ -70,6 +70,25 @@ router.post("/generate-form", (req, res) => {
   
       const pageInfos = result.recordset;
   
+      // Step 1.5: Check for assignments in RolePageAssignments
+      const assignedPages = [];
+      for (const page of pageInfos) {
+        const { PageID, PageName } = page;
+        const assignResult = await pool.request()
+          .input("PageID", sql.VarChar, PageID)
+          .query(`SELECT COUNT(*) as count FROM RolePageAssignments WHERE PageID = @PageID`);
+        if (assignResult.recordset[0].count > 0) {
+          assignedPages.push(PageName);
+        }
+      }
+  
+      if (assignedPages.length > 0) {
+        return res.status(400).json({
+          message: "Some pages are assigned to roles.",
+          assignedPages
+        });
+      }
+  
       // Step 2: Delete from PageDataTables and drop corresponding PageName_table
       for (const page of pageInfos) {
         const { PageID, PageName } = page;
@@ -79,7 +98,7 @@ router.post("/generate-form", (req, res) => {
           .input("PageID", sql.VarChar, PageID)
           .query(`DELETE FROM PageDataTables WHERE PageID = @PageID`);
   
-        // Drop the dynamic page
+        // Drop the dynamic page table
         const tableName = `[${PageName}_table]`;
         await pool.request().query(`IF OBJECT_ID('${tableName}', 'U') IS NOT NULL DROP TABLE ${tableName}`);
       }
@@ -116,7 +135,10 @@ router.post("/generate-form", (req, res) => {
 
     // First loop: only for state and usedComponents
     Object.entries(fieldConfigs).forEach(([key, config], index) => {
-      const label = config.label || `Field${index + 1}`;
+      // Always sanitize field name for DB and data keys
+      const safeFieldName = (config.label || `Field${index + 1}`)
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
       const stateKey = `field_${index}`;
       const type = config.type || key.split("-")[0];
 
@@ -132,15 +154,19 @@ router.post("/generate-form", (req, res) => {
     // Second loop: build formFields string
     let formFields = "";
     Object.entries(fieldConfigs).forEach(([key, config], index) => {
-      const label = config.label || `Field${index + 1}`;
+      const safeFieldName = (config.label || `Field${index + 1}`)
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
       const stateKey = `field_${index}`;
       const type = config.type || key.split("-")[0];
+
+      const displayLabel = (config.label || '').replace(/_/g, " ");
 
       if (type === "Dropdown") {
         formFields += `
           <div key="${key}-${index}">
             <Dropdown
-              label="${label}"
+              label="${displayLabel}"
               value={${stateKey}}
               onChange={set${stateKey}}
               options={${JSON.stringify(config.options || [])}}
@@ -151,7 +177,7 @@ router.post("/generate-form", (req, res) => {
         formFields += `
           <div key="${key}-${index}">
             <Checkbox
-              label="${label}${config.condition ? ` (${config.condition})` : ""}"
+              label="${displayLabel}${config.condition ? ` (${config.condition})` : ""}"
               checked={${stateKey}}
               onChange={set${stateKey}}
             />
@@ -161,7 +187,7 @@ router.post("/generate-form", (req, res) => {
         formFields += `
           <div key="${key}-${index}">
             <DatePicker
-              label="${label}"
+              label="${displayLabel}"
               value={${stateKey}}
               onChange={set${stateKey}}
             />
@@ -171,7 +197,7 @@ router.post("/generate-form", (req, res) => {
         formFields += `
           <div key="${key}-${index}">
             <NumberInput
-              label="${label}"
+              label="${displayLabel}"
               value={${stateKey}}
               onChange={set${stateKey}}
             />
@@ -181,7 +207,7 @@ router.post("/generate-form", (req, res) => {
         formFields += `
           <div key="${key}-${index}">
             <TextField
-              label="${label}"
+              label="${displayLabel}"
               value={${stateKey}}
               onChange={set${stateKey}}
             />
@@ -193,7 +219,7 @@ router.post("/generate-form", (req, res) => {
             <input
               type="text"
               className="p-2 border rounded mb-2 w-full"
-              placeholder="${label}"
+              placeholder="${displayLabel}"
               value={${stateKey}}
               onChange={(e) => set${stateKey}(e.target.value)}
             />
@@ -219,13 +245,40 @@ router.post("/generate-form", (req, res) => {
     };
     const imports = Array.from(usedComponents).map(c => importMap[c]).join("\n");
 
+    // Data object for insert/update
     const dataObject = Object.entries(fieldConfigs)
       .map(([_, config], index) => {
-        const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
+        const safeFieldName = (config.label || `Field${index + 1}`)
+          .replace(/\s+/g, "_")
+          .replace(/[^a-zA-Z0-9_]/g, "");
         const stateKey = `field_${index}`;
-        return `"${fieldName}": ${stateKey}`;
+        return `"${safeFieldName}": ${stateKey}`;
       })
       .join(",\n      ");
+
+    // Row click: load data into fields
+    const rowClickSetters = Object.entries(fieldConfigs).map(([_, config], index) => {
+      const safeFieldName = (config.label || `Field${index + 1}`)
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
+      return `setfield_${index}(row["${safeFieldName}"] ?? "");`;
+    }).join("\n    ");
+
+    // Table headers and cells
+    const tableHeaders = Object.entries(fieldConfigs)
+      .map(([_, config]) =>
+        `<th className="p-2 border-b min-w-[120px]">${(config.label || '').replace(/_/g, " ")}</th>`
+      ).join("");
+
+    const tableCells = Object.entries(fieldConfigs).map(([_, config], index) => {
+      const safeFieldName = (config.label || `Field${index + 1}`)
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
+      if ((config.type || "").toLowerCase().includes("date")) {
+        return `<td className="p-2 border-b min-w-[120px]">{row["${safeFieldName}"] ? new Date(row["${safeFieldName}"]).toLocaleDateString() : ""}</td>`;
+      }
+      return `<td className="p-2 border-b min-w-[120px]">{row["${safeFieldName}"]}</td>`;
+    }).join("");
 
     return `import React from "react";
 ${imports}
@@ -339,10 +392,7 @@ const GeneratedForm = () => {
   // Row click: load data into fields
   const handleRowClick = idx => {
     const row = tableData[idx];
-    ${Object.entries(fieldConfigs).map(([_, config], index) => {
-      const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
-      return `setfield_${index}(row["${fieldName}"] ?? "");`;
-    }).join("\n    ")}
+    ${rowClickSetters}
     setEditingIndex(idx);
   };
 
@@ -379,7 +429,7 @@ const GeneratedForm = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 flex flex-col items-center justify-center">
+      <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
         <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
         <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
           ${inputsCode}
@@ -415,47 +465,39 @@ const GeneratedForm = () => {
         </form>
         <hr className="my-6 w-full border-t-2 border-gray-300" />
         {/* Data Table */}
-        <div className="w-full max-w-full overflow-x-auto mb-6">
-  <div className="w-full overflow-x-auto">
-    <table className="max-w-full bg-white border border-gray-300 shadow" style={{ minWidth: "${Object.keys(fieldConfigs).length * 180 + 60}px" }}>
-      <thead>
-        <tr>
-          <th className="p-2 border-b min-w-[60px]"></th>
-          ${Object.entries(fieldConfigs).map(([_, config]) =>
-            `<th className="p-2 border-b min-w-[180px]">${config.label}</th>`
-          ).join("")}
-        </tr>
-      </thead>
-      <tbody>
-        {filteredTableData.map((row, idx) => (
-          <tr
-            key={row.ID}
-            className="hover:bg-blue-100 cursor-pointer"
-            onClick={() => handleRowClick(idx)}
-          >
-            <td className="p-2 border-b text-center min-w-[60px]">
-              <input
-                type="checkbox"
-                checked={selectedRows.includes(row.ID)}
-                onChange={e => {
-                  e.stopPropagation();
-                  handleSelectRow(row.ID);
-                }}
-              />
-            </td>
-            ${Object.entries(fieldConfigs).map(([_, config], index) => {
-              const fieldName = config.dbFieldName || config.label || `Field${index + 1}`;
-              if ((config.type || "").toLowerCase().includes("date")) {
-                return `<td className="p-2 border-b min-w-[180px]">{row["${fieldName}"] ? new Date(row["${fieldName}"]).toLocaleDateString() : ""}</td>`;
-              }
-              return `<td className="p-2 border-b min-w-[180px]">{row["${fieldName}"]}</td>`;
-            }).join("")}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
+        <div className="w-full flex justify-center mb-6">
+          <div className="w-full max-w-5xl overflow-x-auto">
+            <table className="max-w-full bg-white border border-gray-300 shadow mx-auto" style={{ minWidth: "${Object.keys(fieldConfigs).length * 180 + 60}px" }}>
+              <thead>
+                <tr>
+                  <th className="p-2 border-b min-w-[60px]"></th>
+                  ${tableHeaders}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTableData.map((row, idx) => (
+                  <tr
+                    key={row.ID}
+                    className="hover:bg-blue-100 cursor-pointer"
+                    onClick={() => handleRowClick(idx)}
+                  >
+                    <td className="p-2 border-b text-center min-w-[60px]">
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(row.ID)}
+                        onChange={e => {
+                          e.stopPropagation();
+                          handleSelectRow(row.ID);
+                        }}
+                      />
+                    </td>
+                    ${tableCells}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </main>
        {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
        {showContact && <ContactPopup onClose={() => setShowContact(false)} />}

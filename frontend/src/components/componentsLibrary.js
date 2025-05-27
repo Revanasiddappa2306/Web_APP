@@ -7,7 +7,7 @@ import Dropdown from "./Dropdown";
 import DatePicker from "./DatePicker";
 import NumberInput from "./NumberInput";
 // import ToggleSwitch from "./ToggleSwitch";
-import Button1 from "./Button1";
+// import Button1 from "./Button1";
 
 
 export const componentsLibrary = {
@@ -19,5 +19,5 @@ export const componentsLibrary = {
   DatePicker: { label: "Date Picker", component: DatePicker },
   NumberInput: { label: "Number Input", component: NumberInput },
   // ToggleSwitch: { label: "Toggle Switch", component: ToggleSwitch },
-  Button1: { label: "Button", component: Button1 },
+  // Button1: { label: "Button", component: Button1 },
 };

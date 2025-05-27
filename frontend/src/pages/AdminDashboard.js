@@ -72,17 +72,18 @@ const AdminDashboard = () => {
           <h1 className="text-3xl font-bold">Alcon</h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
             {/* Actions Dropdown */}
-            <div className="relative group">
+            {/* <div className="relative group">
               <button className="hover:text-yellow-300">Actions</button>
               <div className="absolute top-full left-0 mt-2 w-40 bg-white text-black shadow-lg rounded-md opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transform scale-95 group-hover:scale-100 transition-all duration-200 z-10">
                 <button onClick={handleCreatePage} className="px-4 py-2 hover:bg-gray-100 text-left w-full"> Create Page </button>
                 <button onClick={handleYourPagesClick} className="px-4 py-2 hover:bg-gray-100 text-left w-full" > Pages Created </button>
               </div>
-            </div>
-         
-            <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
-            <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
-            <button onClick={() => window.open("/requests", "_blank")} className="relative hover:underline">
+            </div> */}
+            <button onClick={handleCreatePage} className="hover:text-yellow-300"> Create Page </button>
+            <button onClick={handleYourPagesClick} className="hover:text-yellow-300" > Pages Created </button>
+            <button onClick={() => setShowAbout(true)} className="hover:text-yellow-300">About</button>
+            <button onClick={() => setShowContact(true)} className="hover:text-yellow-300">Contact</button>
+            <button onClick={() => window.open("/requests", "_blank")} className="relative hover:text-yellow-300">
               Requests
               {unreadCount > 0 && (
                 <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">

@@ -142,6 +142,21 @@ router.post("/insert-into-table", async (req, res) => {
   try {
     const pool = await poolPromise;
 
+    // Get column types from INFORMATION_SCHEMA
+    const schemaQuery = `
+      SELECT COLUMN_NAME, DATA_TYPE
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = @tableName
+    `;
+    const schemaResult = await pool.request()
+      .input("tableName", sql.NVarChar, tableName)
+      .query(schemaQuery);
+
+    const columnTypes = {};
+    schemaResult.recordset.forEach(col => {
+      columnTypes[col.COLUMN_NAME] = col.DATA_TYPE;
+    });
+
     const columns = Object.keys(data).map(col => `[${col}]`).join(", ");
     const parameters = Object.keys(data).map((col, idx) => `@param${idx}`).join(", ");
 
@@ -151,11 +166,16 @@ router.post("/insert-into-table", async (req, res) => {
 
     Object.entries(data).forEach(([key, value], idx) => {
       const paramName = `param${idx}`;
+      const colType = columnTypes[key];
 
-      if (typeof value === "number") {
-        request.input(paramName, sql.Int, value);
-      } else if (!isNaN(Date.parse(value))) {
-        // Valid date string
+      // Insert null if value is empty string or undefined
+      if (value === "" || value === undefined || value === null) {
+        request.input(paramName, sql.Null);
+      } else if (colType === "int" || colType === "float" || colType === "decimal" || colType === "numeric") {
+        request.input(paramName, sql.Float, Number(value));
+      } else if (colType === "bit") {
+        request.input(paramName, sql.Bit, value === true || value === "true" || value === 1 ? 1 : 0);
+      } else if (colType === "date" || colType === "datetime" || colType === "datetime2" || colType === "smalldatetime") {
         request.input(paramName, sql.DateTime, new Date(value));
       } else {
         request.input(paramName, sql.NVarChar, value);

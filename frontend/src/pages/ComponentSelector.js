@@ -99,11 +99,11 @@ const ComponentSelector = () => {
           )}
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 flex justify-end">
           <Button
             text="Next Configure Fields"
             onClick={handleGenerate}
-            className="w-1/3 bg-green-600 hover:bg-green-700 text-white py-2 px-4 text-sm rounded mx-auto block"
+            className="w-60 bg-green-600 hover:bg-green-700 text-white py-2 px-4 text-sm rounded "
           />
         </div>
       </main>
