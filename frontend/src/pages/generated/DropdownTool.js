@@ -513,12 +513,36 @@ const [field_24, setfield_24] = React.useState("");
         <hr className="my-6 w-full border-t-2 border-gray-300" />
         {/* Data Table */}
         <div className="w-full flex justify-center mb-6">
-          <div className="w-full max-w-5xl overflow-x-auto">
-            <table className="max-w-full bg-white border border-gray-300 shadow mx-auto" style={{ minWidth: "4560px" }}>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full bg-white border border-gray-300 shadow mx-auto">
               <thead>
                 <tr>
-                  <th className="p-2 border-b min-w-[60px]"></th>
-                  <th className="p-2 border-b min-w-[120px]">Select Date</th><th className="p-2 border-b min-w-[120px]">Select shift</th><th className="p-2 border-b min-w-[120px]">ML Headcount Total</th><th className="p-2 border-b min-w-[120px]">PACE Headcount</th><th className="p-2 border-b min-w-[120px]">CBASS Parts Built</th><th className="p-2 border-b min-w-[120px]">MI headcount Alcon only</th><th className="p-2 border-b min-w-[120px]">PPEP Headcount</th><th className="p-2 border-b min-w-[120px]">CBASS Scrap </th><th className="p-2 border-b min-w-[120px]">Alcon LOA</th><th className="p-2 border-b min-w-[120px]">Japan Headcount</th><th className="p-2 border-b min-w-[120px]">Hrs\Day</th><th className="p-2 border-b min-w-[120px]">Alcon Absense</th><th className="p-2 border-b min-w-[120px]">Total PACE Downtime(Minutes)</th><th className="p-2 border-b min-w-[120px]">OT Headcount</th><th className="p-2 border-b min-w-[120px]">Total PREP Downtime(Minutes)</th><th className="p-2 border-b min-w-[120px]">WareHouse headcount</th><th className="p-2 border-b min-w-[120px]">Mainline Issue Downtime(mnutes)</th><th className="p-2 border-b min-w-[120px]">Mainlines-COMMENT</th><th className="p-2 border-b min-w-[120px]">SPB PREP-COMMENT</th><th className="p-2 border-b min-w-[120px]">SPB PACE-COMMENT</th><th className="p-2 border-b min-w-[120px]">PAT-COMMENT</th><th className="p-2 border-b min-w-[120px]">WHS-COMMENT</th><th className="p-2 border-b min-w-[120px]">JAPAN-COMMENT</th><th className="p-2 border-b min-w-[120px]">CBASS-COMMENT</th><th className="p-2 border-b min-w-[120px]">Employee-COMMENT</th>
+                  <th className="p-2 border-b border-r w-8"></th>
+                  <th className="p-2 border-b border-r min-w-[120px]">Select Date</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">Select shift</th>
+                  <th className="p-2 border-b border-r min-w-[80px]">ML Headcount Total</th>
+                  <th className="p-2 border-b border-r min-w-[80px]">PACE Headcount</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">CBASS Parts Built</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">MI headcount Alcon only</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">PPEP Headcount</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">CBASS Scrap </th>
+                  <th className="p-2 border-b border-r min-w-[100px]">Alcon LOA</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">Japan Headcount</th>
+                  <th className="p-2 border-b border-r min-w-[80px]">Hrs\Day</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">Alcon Absense</th>
+                  <th className="p-2 border-b border-r min-w-[120px]">Total PACE Downtime(Minutes)</th>
+                  <th className="p-2 border-b border-r min-w-[80px]">OT Headcount</th>
+                  <th className="p-2 border-b border-r min-w-[120px]">Total PREP Downtime(Minutes)</th>
+                  <th className="p-2 border-b border-r min-w-[100px]">WareHouse headcount</th>
+                  <th className="p-2 border-b border-r min-w-[120px]">Mainline Issue Downtime(mnutes)</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">Mainlines-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">SPB PREP-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">SPB PACE-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">PAT-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">WHS-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">JAPAN-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">CBASS-COMMENT</th>
+                  <th className="p-2 border-b border-r min-w-[160px]">Employee-COMMENT</th>
                 </tr>
               </thead>
               <tbody>
@@ -528,7 +552,7 @@ const [field_24, setfield_24] = React.useState("");
                     className="hover:bg-blue-100 cursor-pointer"
                     onClick={() => handleRowClick(idx)}
                   >
-                    <td className="p-2 border-b text-center min-w-[60px]">
+                    <td className="p-2 border-b border-r text-center w-8">
                       <input
                         type="checkbox"
                         checked={selectedRows.includes(row.ID)}
@@ -538,7 +562,31 @@ const [field_24, setfield_24] = React.useState("");
                         }}
                       />
                     </td>
-                    <td className="p-2 border-b min-w-[120px]">{row["Select_Date"] ? new Date(row["Select_Date"]).toLocaleDateString() : ""}</td><td className="p-2 border-b min-w-[120px]">{row["Select_shift"]}</td><td className="p-2 border-b min-w-[120px]">{row["ML_Headcount_Total"]}</td><td className="p-2 border-b min-w-[120px]">{row["PACE_Headcount"]}</td><td className="p-2 border-b min-w-[120px]">{row["CBASS_Parts_Built"]}</td><td className="p-2 border-b min-w-[120px]">{row["MI_headcount_Alcon_only"]}</td><td className="p-2 border-b min-w-[120px]">{row["PPEP_Headcount"]}</td><td className="p-2 border-b min-w-[120px]">{row["CBASS_Scrap_"]}</td><td className="p-2 border-b min-w-[120px]">{row["Alcon_LOA"]}</td><td className="p-2 border-b min-w-[120px]">{row["Japan_Headcount"]}</td><td className="p-2 border-b min-w-[120px]">{row["HrsDay"]}</td><td className="p-2 border-b min-w-[120px]">{row["Alcon_Absense"]}</td><td className="p-2 border-b min-w-[120px]">{row["Total_PACE_DowntimeMinutes"]}</td><td className="p-2 border-b min-w-[120px]">{row["OT_Headcount"]}</td><td className="p-2 border-b min-w-[120px]">{row["Total_PREP_DowntimeMinutes"]}</td><td className="p-2 border-b min-w-[120px]">{row["WareHouse_headcount"]}</td><td className="p-2 border-b min-w-[120px]">{row["Mainline_Issue_Downtimemnutes"]}</td><td className="p-2 border-b min-w-[120px]">{row["MainlinesCOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["SPB_PREPCOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["SPB_PACECOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["PATCOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["WHSCOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["JAPANCOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["CBASSCOMMENT"]}</td><td className="p-2 border-b min-w-[120px]">{row["EmployeeCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[120px]">{row["Select_Date"] ? new Date(row["Select_Date"]).toLocaleDateString() : ""}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["Select_shift"]}</td>
+                    <td className="p-2 border-b border-r min-w-[80px]">{row["ML_Headcount_Total"]}</td>
+                    <td className="p-2 border-b border-r min-w-[80px]">{row["PACE_Headcount"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["CBASS_Parts_Built"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["MI_headcount_Alcon_only"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["PPEP_Headcount"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["CBASS_Scrap_"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["Alcon_LOA"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["Japan_Headcount"]}</td>
+                    <td className="p-2 border-b border-r min-w-[80px]">{row["HrsDay"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["Alcon_Absense"]}</td>
+                    <td className="p-2 border-b border-r min-w-[120px]">{row["Total_PACE_DowntimeMinutes"]}</td>
+                    <td className="p-2 border-b border-r min-w-[80px]">{row["OT_Headcount"]}</td>
+                    <td className="p-2 border-b border-r min-w-[120px]">{row["Total_PREP_DowntimeMinutes"]}</td>
+                    <td className="p-2 border-b border-r min-w-[100px]">{row["WareHouse_headcount"]}</td>
+                    <td className="p-2 border-b border-r min-w-[120px]">{row["Mainline_Issue_Downtimemnutes"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["MainlinesCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["SPB_PREPCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["SPB_PACECOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["PATCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["WHSCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["JAPANCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["CBASSCOMMENT"]}</td>
+                    <td className="p-2 border-b border-r min-w-[160px]">{row["EmployeeCOMMENT"]}</td>
                   </tr>
                 ))}
               </tbody>

@@ -264,21 +264,35 @@ router.post("/generate-form", (req, res) => {
       return `setfield_${index}(row["${safeFieldName}"] ?? "");`;
     }).join("\n    ");
 
-    // Table headers and cells
-    const tableHeaders = Object.entries(fieldConfigs)
-      .map(([_, config]) =>
-        `<th className="p-2 border-b min-w-[120px]">${(config.label || '').replace(/_/g, " ")}</th>`
-      ).join("");
+    // Helper for column width
+function getColWidth(type) {
+  if (!type) return "min-w-[120px]";
+  type = type.toLowerCase();
+  if (type.includes("number") || type.includes("int") || type.includes("float")) return "min-w-[80px] w-[80px]";
+  if (type.includes("date")) return "min-w-[120px] w-[120px]";
+  if (type.includes("checkbox") || type.includes("bit")) return "min-w-[60px] w-[60px]";
+  if (type.includes("dropdown")) return "min-w-[100px] w-[100px]";
+  if (type.includes("comment") || type.includes("text")) return "min-w-[160px] w-[160px]";
+  return "min-w-[120px] w-[120px]";
+}
 
-    const tableCells = Object.entries(fieldConfigs).map(([_, config], index) => {
-      const safeFieldName = (config.label || `Field${index + 1}`)
-        .replace(/\s+/g, "_")
-        .replace(/[^a-zA-Z0-9_]/g, "");
-      if ((config.type || "").toLowerCase().includes("date")) {
-        return `<td className="p-2 border-b min-w-[120px]">{row["${safeFieldName}"] ? new Date(row["${safeFieldName}"]).toLocaleDateString() : ""}</td>`;
-      }
-      return `<td className="p-2 border-b min-w-[120px]">{row["${safeFieldName}"]}</td>`;
-    }).join("");
+const tableHeaders = Object.entries(fieldConfigs)
+  .map(([_, config]) => {
+    const type = config.type || "";
+    return `<th className="p-2 border-b border-r ${getColWidth(type)}">${(config.label || '').replace(/_/g, " ")}</th>`;
+  })
+  .join("");
+
+const tableCells = Object.entries(fieldConfigs).map(([_, config], index) => {
+  const safeFieldName = (config.label || `Field${index + 1}`)
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_]/g, "");
+  const type = config.type || "";
+  if (type.toLowerCase().includes("date")) {
+    return `<td className="p-2 border-b border-r ${getColWidth(type)}">{row["${safeFieldName}"] ? new Date(row["${safeFieldName}"]).toLocaleDateString() : ""}</td>`;
+  }
+  return `<td className="p-2 border-b border-r ${getColWidth(type)}">{row["${safeFieldName}"]}</td>`;
+}).join("");
 
     return `import React from "react";
 ${imports}
@@ -373,6 +387,7 @@ const GeneratedForm = () => {
   // Delete
   const handleDelete = async () => {
     if (selectedRows.length === 0) return;
+    if (!window.confirm("Are you sure you want to delete the selected row(s)?")) return;
     try {
       const response = await fetch("http://localhost:5000/api/tables/delete-rows", {
         method: "POST",
@@ -466,11 +481,11 @@ const GeneratedForm = () => {
         <hr className="my-6 w-full border-t-2 border-gray-300" />
         {/* Data Table */}
         <div className="w-full flex justify-center mb-6">
-          <div className="w-full max-w-5xl overflow-x-auto">
-            <table className="max-w-full bg-white border border-gray-300 shadow mx-auto" style={{ minWidth: "${Object.keys(fieldConfigs).length * 180 + 60}px" }}>
+          <div className="w-full overflow-x-auto">
+            <table className="table-auto bg-white border border-gray-300 shadow mx-auto">
               <thead>
                 <tr>
-                  <th className="p-2 border-b min-w-[60px]"></th>
+                  <th className="p-2 border-b border-r min-w-[60px]"></th>
                   ${tableHeaders}
                 </tr>
               </thead>
@@ -481,7 +496,7 @@ const GeneratedForm = () => {
                     className="hover:bg-blue-100 cursor-pointer"
                     onClick={() => handleRowClick(idx)}
                   >
-                    <td className="p-2 border-b text-center min-w-[60px]">
+                    <td className="p-2 border-b border-r text-center min-w-[60px]">
                       <input
                         type="checkbox"
                         checked={selectedRows.includes(row.ID)}

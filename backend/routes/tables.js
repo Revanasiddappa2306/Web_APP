@@ -60,6 +60,7 @@ router.post("/create-data-table", async (req, res) => {
     const dataTableName = `${pageName.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")}_Table`;
 
     let columns = '';
+    let primaryKeys = [];
 
     const typeMap = {
       DatePicker: "Date",
@@ -97,16 +98,32 @@ router.post("/create-data-table", async (req, res) => {
       }
 
       columns += `${safeColumnName} ${columnType},\n`;
+
+      // Collect primary keys
+      if (field.isPrimaryKey) {
+        primaryKeys.push(safeColumnName);
+      }
     });
     
 
     columns = columns.slice(0, -2); // Remove trailing comma & newline
 
+    let primaryKeyClause = '';
+    if (primaryKeys.length === 1) {
+      primaryKeyClause = `PRIMARY KEY (${primaryKeys[0]})`;
+    } else if (primaryKeys.length > 1) {
+      primaryKeyClause = `PRIMARY KEY (${primaryKeys.join(", ")})`;
+    } else {
+      // Fallback to ID as primary key
+      primaryKeyClause = `PRIMARY KEY (ID)`;
+    }
+
     const createTableQuery = `
       CREATE TABLE ${dataTableName} (
-        ID INT PRIMARY KEY IDENTITY(1,1),
+        ID INT IDENTITY(1,1),
         ${columns},
-        DateTimeEntered DATETIME
+        DateTimeEntered DATETIME,
+        ${primaryKeyClause}
       );
     `;
 

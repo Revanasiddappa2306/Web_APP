@@ -249,6 +249,17 @@ const ConfigureFields = () => {
                 />
               </>
             )}
+
+            {/* Primary Key Checkbox */}
+            <input
+              type="checkbox"
+              className="mr-2"
+              checked={!!fieldConfigs[`${key}-${index}`]?.isPrimaryKey}
+              onChange={e =>
+                handleChange(`${key}-${index}`, "isPrimaryKey", e.target.checked)
+              }
+            />
+            <label className="mr-4">Is Primary Key?</label>
           </div>
         ));
       })}

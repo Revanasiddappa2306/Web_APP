@@ -42,6 +42,7 @@ const YourPages = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedPages.length === 0) return;
+    if (!window.confirm("Are you sure you want to delete the selected page(s)?")) return;
 
     try {
       const res = await fetch("http://localhost:5000/api/pages/delete-pages", {
