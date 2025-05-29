@@ -26,6 +26,14 @@ const ComponentSelector = () => {
   };
 
   const handleGenerate = () => {
+    // Check if at least one component is selected with quantity > 0
+    const hasSelection = Object.values(selectedComponents).some(
+      (comp) => comp.quantity && comp.quantity > 0
+    );
+    if (!hasSelection) {
+      alert("Please select components first");
+      return;
+    }
     navigate("/configure-fields", { state: { selectedComponents } });
   };
 

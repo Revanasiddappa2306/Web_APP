@@ -9,6 +9,11 @@ const RequestsPage = () => {
   const [popupHeading, setPopupHeading] = useState(""); // New state for popup heading
 
   useEffect(() => {
+    // Set the browser tab title
+    document.title = "Requests";
+  }, []);
+  
+  useEffect(() => {
     fetch("http://localhost:5000/api/requirements/all")
       .then(res => res.json())
       .then(setRequests);

@@ -15,8 +15,7 @@ const PageCreationGuidePopup = ({ onClose }) => (
       <h2 className="text-xl font-bold mb-4 text-center text-alconBlue">Page Creation Guide</h2>
       <ol className="list-decimal pl-4 space-y-2 text-left">
         <li>
-          In this component selection page, select components in the order you want them to appear on the page (e.g., if you select 4 text fields and 2 dropdowns in order, they will appear in the new page in that order: first text fields, then dropdowns). <br />
-          <span className="font-semibold">Make sure you select the correct quantity you need in order.</span>
+          In this component selection page, select components you needed and specify quantity you want. <br />
         </li>
         <li>
           Click the <span className="font-semibold">Next Configure Fields</span> button. This will navigate to the configuration page.
@@ -25,13 +24,24 @@ const PageCreationGuidePopup = ({ onClose }) => (
           Give a name to the page and to each field you have selected. <br />
           <span className="font-semibold">
             <ul className="list-disc pl-6">
-              <li>No spaces should be in names. If more than one word, add an underscore (<code>_</code>) between words.</li>
               <li>Names should start with a letter (not with a number or special character).</li>
             </ul>
           </span>
         </li>
         <li>
-          After giving names (configuring fields), click the <span className="font-semibold">Submit Config</span> button. A new page will be created and a popup will appear asking "Do you want to create a table for this page?" If yes, a table is created in the backend and stored in the database. Then the new page will be loaded.
+          After giving names (configuring fields), click the <span className="font-semibold">Submit Config</span> button. 
+        </li>
+        <li>
+          Below the page a preview of the page will be shown. You can drag and drop the fields to rearrange them. <br />
+          <span className="font-semibold">
+            Note: The preview is not editable. It is just a preview of the page.  
+            </span>  
+        </li>
+        <li>
+          Click the <span className="font-semibold">Generate Page</span> button to generate the page. <br />
+        </li>
+        <li>
+        A new page will be created and a popup will appear asking "Do you want to create a table for this page?" If yes, a table is created in the backend and stored in the database. Then the new page will be loaded.
         </li>
       </ol>
       <div className="mt-4 font-bold text-red-700">

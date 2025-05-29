@@ -19,10 +19,13 @@ router.post("/save-page-details", async (req, res) => {
     const pool = await poolPromise;
 
     // Generate new PageID (example: Pg01, Pg02)
-    const countQuery = `SELECT COUNT(*) AS count FROM Pages`;
-    const countResult = await pool.request().query(countQuery);
-    const pageCount = countResult.recordset[0].count + 1;
-    const pageId = `Pg${pageCount.toString().padStart(2, "0")}`; // Pg01, Pg02, etc.
+    // Get the max PageID number
+    const maxIdQuery = `
+      SELECT MAX(CAST(SUBSTRING(PageID, 3, LEN(PageID)) AS INT)) AS maxId FROM Pages
+    `;
+    const maxIdResult = await pool.request().query(maxIdQuery);
+    const maxId = maxIdResult.recordset[0].maxId || 0;
+    const pageId = `Pg${(maxId + 1).toString().padStart(2, "0")}`; // Pg01, Pg02, etc.
 
     // Insert into Pages table
     const insertQuery = `
@@ -203,8 +206,23 @@ router.post("/insert-into-table", async (req, res) => {
 
     res.status(200).json({ message: "✅ Data inserted successfully" });
   } catch (err) {
-    console.error("❌ Error inserting data:", err);
-    res.status(500).json({ message: "Error inserting data", error: err.message });
+    console.error("❌ Error inserting/updating data:", err);
+
+    // Primary key violation
+    if (err.number === 2627 || (err.originalError && err.originalError.code === 2627)) {
+      return res.status(400).json({ code: "PRIMARY_KEY_VIOLATION", message: "Primary key already exists. Please use a unique value." });
+    }
+    // Data type conversion error
+    if (err.number === 257 || (err.originalError && err.originalError.code === 257)) {
+      return res.status(400).json({ code: "TYPE_CONVERSION_ERROR", message: "Invalid data type for one or more fields." });
+    }
+    // Not null constraint
+    if (err.message && err.message.includes("cannot be null")) {
+      return res.status(400).json({ code: "NOT_NULL_VIOLATION", message: "A required field is missing." });
+    }
+
+    // Default
+    res.status(500).json({ code: "UNKNOWN_ERROR", message: err.message || "Unknown error" });
   }
 });
 
@@ -232,20 +250,45 @@ router.post("/update-row", async (req, res) => {
   }
   try {
     const pool = await poolPromise;
+
+    // Get column types from INFORMATION_SCHEMA
+    const schemaQuery = `
+      SELECT COLUMN_NAME, DATA_TYPE
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = @tableName
+    `;
+    const schemaResult = await pool.request()
+      .input("tableName", sql.NVarChar, tableName)
+      .query(schemaQuery);
+
+    const columnTypes = {};
+    schemaResult.recordset.forEach(col => {
+      columnTypes[col.COLUMN_NAME] = col.DATA_TYPE;
+    });
+
     const setClause = Object.keys(data)
       .map((col, idx) => `[${col}] = @param${idx}`)
       .join(", ");
     const request = pool.request();
+
     Object.entries(data).forEach(([key, value], idx) => {
       const paramName = `param${idx}`;
-      if (typeof value === "number") {
-        request.input(paramName, sql.Int, value);
-      } else if (!isNaN(Date.parse(value))) {
+      const colType = columnTypes[key];
+
+      // Insert null if value is empty string or undefined or null
+      if (value === "" || value === undefined || value === null) {
+        request.input(paramName, sql.Null);
+      } else if (colType === "int" || colType === "float" || colType === "decimal" || colType === "numeric") {
+        request.input(paramName, sql.Float, Number(value));
+      } else if (colType === "bit") {
+        request.input(paramName, sql.Bit, value === true || value === "true" || value === 1 ? 1 : 0);
+      } else if (colType === "date" || colType === "datetime" || colType === "datetime2" || colType === "smalldatetime") {
         request.input(paramName, sql.DateTime, new Date(value));
       } else {
         request.input(paramName, sql.NVarChar, value);
       }
     });
+
     request.input("id", sql.Int, id);
     await request.query(`UPDATE [${tableName}] SET ${setClause} WHERE ID = @id`);
     res.json({ message: "Row updated successfully" });

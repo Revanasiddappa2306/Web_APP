@@ -42,6 +42,19 @@ const ConfigureFields = () => {
   };
 
   const handlePreview = () => {
+    // First, check page name
+    if (!customPageName.trim()) {
+      alert("Please enter a custom page name.");
+      return;
+    }
+    // Then, check all fields are configured
+    const allConfigured = fieldOrder.every(
+      (key) => fieldConfigs[key] && fieldConfigs[key].label && fieldConfigs[key].label.trim() !== ""
+    );
+    if (!allConfigured) {
+      alert("Please configure all fields");
+      return;
+    }
     setPreviewFieldOrder(fieldOrder);
     setShowPreview(true);
   };
@@ -52,11 +65,20 @@ const ConfigureFields = () => {
       orderedFieldConfigs[key] = fieldConfigs[key];
     });
 
+    // Check if all fields are configured (label is required for each field)
+    const allConfigured = finalOrder.every(
+      (key) => fieldConfigs[key] && fieldConfigs[key].label && fieldConfigs[key].label.trim() !== ""
+    );
+    if (!allConfigured) {
+      alert("Please configure all fields");
+      return;
+    }
+
     if (!customPageName.trim()) {
       alert("Please enter a custom page name.");
       return;
     }
-    const cleanPageName = customPageName.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");;
+    const cleanPageName = customPageName.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");
     const payload = {
       pageName: cleanPageName,
       fieldConfigs: orderedFieldConfigs,
