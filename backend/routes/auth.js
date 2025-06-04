@@ -8,14 +8,26 @@ const router = express.Router();
 
 // User Registration Route//////////////////////////////////////////////////////////////////////////////////
 router.post("/register-user", async (req, res) => {
-  const { firstName, lastName, mobileNum, email, password } = req.body;
+  const { id, firstName, lastName, mobileNum, email, password } = req.body;
 
-  if (!firstName || !lastName || !mobileNum || !email || !password) {
+  if (!id || !firstName || !lastName || !mobileNum || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
+  }
+  if (!email.endsWith("@alcon.com")) {
+    return res.status(400).json({ message: "Email must be a valid @alcon.com address" });
   }
 
   try {
     const pool = await poolPromise;
+
+    // Check if 521ID already exists
+    const checkIdQuery = `SELECT * FROM Users WHERE UserID = @UserID`;
+    const checkIdRequest = pool.request();
+    checkIdRequest.input("UserID", sql.VarChar, id);
+    const checkIdResult = await checkIdRequest.query(checkIdQuery);
+    if (checkIdResult.recordset.length > 0) {
+      return res.status(409).json({ message: "User already exists with this 521ID" });
+    }
 
     // Check if email already exists
     const checkUserQuery = `SELECT * FROM Users WHERE Email = @Email`;
@@ -27,12 +39,6 @@ router.post("/register-user", async (req, res) => {
       return res.status(409).json({ message: "User already exists with this email" });
     }
 
-    // Generate new UserID (example: Us01, Us02)
-    const getUserCountQuery = `SELECT COUNT(*) AS count FROM Users`;
-    const countResult = await pool.request().query(getUserCountQuery);
-    const userCount = countResult.recordset[0].count + 1;
-    const userId = `Us${userCount.toString().padStart(2, "0")}`; // Us01, Us02, etc.
-
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -43,7 +49,7 @@ router.post("/register-user", async (req, res) => {
     `;
 
     const insertRequest = pool.request();
-    insertRequest.input("UserID", sql.VarChar, userId);
+    insertRequest.input("UserID", sql.VarChar, id);
     insertRequest.input("FirstName", sql.NVarChar, firstName);
     insertRequest.input("LastName", sql.NVarChar, lastName);
     insertRequest.input("MobileNum", sql.NVarChar, mobileNum);
@@ -61,14 +67,26 @@ router.post("/register-user", async (req, res) => {
 
 // Admin Registration Route ///////////////////////////////////////////////////////////////////////////////////////////
 router.post("/register-admin", async (req, res) => {
-  const { firstName, lastName, mobileNum, email, password } = req.body;
+  const { id, firstName, lastName, mobileNum, email, password } = req.body;
 
-  if (!firstName || !lastName || !mobileNum || !email || !password) {
+  if (!id || !firstName || !lastName || !mobileNum || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
+  }
+  if (!email.endsWith("@alcon.com")) {
+    return res.status(400).json({ message: "Email must be a valid @alcon.com address" });
   }
 
   try {
     const pool = await poolPromise;
+
+    // Check if 521ID already exists
+    const checkIdQuery = `SELECT * FROM Admins WHERE AdminID = @AdminID`;
+    const checkIdRequest = pool.request();
+    checkIdRequest.input("AdminID", sql.VarChar, id);
+    const checkIdResult = await checkIdRequest.query(checkIdQuery);
+    if (checkIdResult.recordset.length > 0) {
+      return res.status(409).json({ message: "Admin already exists with this 521ID" });
+    }
 
     // Check if email already exists
     const checkUserQuery = `SELECT * FROM Admins WHERE Email = @Email`;
@@ -80,23 +98,17 @@ router.post("/register-admin", async (req, res) => {
       return res.status(409).json({ message: "Admin already exists with this email" });
     }
 
-    // Generate new UserID (example: Us01, Us02)
-    const getUserCountQuery = `SELECT COUNT(*) AS count FROM Admins`;
-    const countResult = await pool.request().query(getUserCountQuery);
-    const adminCount = countResult.recordset[0].count + 1;
-    const adminId = `Ad${adminCount.toString().padStart(2, "0")}`; // Us01, Us02, etc.
-
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user
+    // Insert admin
     const insertQuery = `
       INSERT INTO Admins (AdminID, FirstName, LastName, MobileNum, Email, PasswordHash)
       VALUES (@AdminID, @FirstName, @LastName, @MobileNum, @Email, @PasswordHash)
     `;
 
     const insertRequest = pool.request();
-    insertRequest.input("AdminID", sql.VarChar, adminId);
+    insertRequest.input("AdminID", sql.VarChar, id);
     insertRequest.input("FirstName", sql.NVarChar, firstName);
     insertRequest.input("LastName", sql.NVarChar, lastName);
     insertRequest.input("MobileNum", sql.NVarChar, mobileNum);
@@ -108,7 +120,7 @@ router.post("/register-admin", async (req, res) => {
     res.status(201).json({ message: "Admin registered successfully ✌️" });
   } catch (err) {
     console.error("❌ Registration Error:", err);
-    res.status(500).json({ message: "Error registering user", error: err.message });
+    res.status(500).json({ message: "Error registering admin", error: err.message });
   }
 });
 

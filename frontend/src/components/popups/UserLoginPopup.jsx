@@ -91,7 +91,9 @@ export default function UserLogin({ onClose }) {
             </button>
           </p>
         </form>
-        {showRegister && <UserRegister onClose={() => setShowRegister(false)} />}
+        {showRegister && (
+          <UserRegister onClose={() => setShowRegister(false)} onSwitchToLogin={() => {setShowRegister(false); }} />
+        )}
         <ToastContainer />
       </div>
     </div>

@@ -162,20 +162,29 @@ router.post("/insert-into-table", async (req, res) => {
   try {
     const pool = await poolPromise;
 
-    // Get column types from INFORMATION_SCHEMA
+    // Get column types and primary keys
     const schemaQuery = `
       SELECT COLUMN_NAME, DATA_TYPE
       FROM INFORMATION_SCHEMA.COLUMNS
       WHERE TABLE_NAME = @tableName
     `;
+    const pkQuery = `
+      SELECT COLUMN_NAME
+      FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+      WHERE TABLE_NAME = @tableName AND OBJECTPROPERTY(OBJECT_ID(CONSTRAINT_SCHEMA + '.' + QUOTENAME(CONSTRAINT_NAME)), 'IsPrimaryKey') = 1
+    `;
     const schemaResult = await pool.request()
       .input("tableName", sql.NVarChar, tableName)
       .query(schemaQuery);
+    const pkResult = await pool.request()
+      .input("tableName", sql.NVarChar, tableName)
+      .query(pkQuery);
 
     const columnTypes = {};
     schemaResult.recordset.forEach(col => {
       columnTypes[col.COLUMN_NAME] = col.DATA_TYPE;
     });
+    const primaryKeys = pkResult.recordset.map(row => row.COLUMN_NAME);
 
     const columns = Object.keys(data).map(col => `[${col}]`).join(", ");
     const parameters = Object.keys(data).map((col, idx) => `@param${idx}`).join(", ");
@@ -183,12 +192,9 @@ router.post("/insert-into-table", async (req, res) => {
     const insertQuery = `INSERT INTO [${tableName}] (${columns}, DateTimeEntered) VALUES (${parameters}, GETDATE())`;
 
     const request = pool.request();
-
     Object.entries(data).forEach(([key, value], idx) => {
       const paramName = `param${idx}`;
       const colType = columnTypes[key];
-
-      // Insert null if value is empty string or undefined
       if (value === "" || value === undefined || value === null) {
         request.input(paramName, sql.Null);
       } else if (colType === "int" || colType === "float" || colType === "decimal" || colType === "numeric") {
@@ -203,26 +209,71 @@ router.post("/insert-into-table", async (req, res) => {
     });
 
     await request.query(insertQuery);
+    return res.status(200).json({ status: "inserted", message: "✅ Data inserted successfully" });
 
-    res.status(200).json({ message: "✅ Data inserted successfully" });
   } catch (err) {
-    console.error("❌ Error inserting/updating data:", err);
-
-    // Primary key violation
+    // If primary key violation, do update instead
     if (err.number === 2627 || (err.originalError && err.originalError.code === 2627)) {
-      return res.status(400).json({ code: "PRIMARY_KEY_VIOLATION", message: "Primary key already exists. Please use a unique value." });
+      // Build update query
+      try {
+        const pool = await poolPromise;
+        const setClause = Object.keys(data)
+          .filter(col => !primaryKeys.includes(col))
+          .map((col, idx) => `[${col}] = @param${idx}`)
+          .join(", ");
+        const whereClause = primaryKeys.map((col, idx) => `[${col}] = @pk${idx}`).join(" AND ");
+        const request = pool.request();
+
+        let paramIdx = 0;
+        Object.entries(data).forEach(([key, value]) => {
+          if (!primaryKeys.includes(key)) {
+            const colType = columnTypes[key];
+            if (value === "" || value === undefined || value === null) {
+              request.input(`param${paramIdx}`, sql.Null);
+            } else if (colType === "int" || colType === "float" || colType === "decimal" || colType === "numeric") {
+              request.input(`param${paramIdx}`, sql.Float, Number(value));
+            } else if (colType === "bit") {
+              request.input(`param${paramIdx}`, sql.Bit, value === true || value === "true" || value === 1 ? 1 : 0);
+            } else if (colType === "date" || colType === "datetime" || colType === "datetime2" || colType === "smalldatetime") {
+              request.input(`param${paramIdx}`, sql.DateTime, new Date(value));
+            } else {
+              request.input(`param${paramIdx}`, sql.NVarChar, value);
+            }
+            paramIdx++;
+          }
+        });
+        // Add primary key params for WHERE clause
+        primaryKeys.forEach((col, idx) => {
+          const colType = columnTypes[col];
+          const value = data[col];
+          if (value === "" || value === undefined || value === null) {
+            request.input(`pk${idx}`, sql.Null);
+          } else if (colType === "int" || colType === "float" || colType === "decimal" || colType === "numeric") {
+            request.input(`pk${idx}`, sql.Float, Number(value));
+          } else if (colType === "bit") {
+            request.input(`pk${idx}`, sql.Bit, value === true || value === "true" || value === 1 ? 1 : 0);
+          } else if (colType === "date" || colType === "datetime" || colType === "datetime2" || colType === "smalldatetime") {
+            request.input(`pk${idx}`, sql.DateTime, new Date(value));
+          } else {
+            request.input(`pk${idx}`, sql.NVarChar, value);
+          }
+        });
+
+        await request.query(`UPDATE [${tableName}] SET ${setClause} WHERE ${whereClause}`);
+        return res.status(200).json({ status: "updated", message: "Row updated as primary key already existed." });
+      } catch (updateErr) {
+        return res.status(500).json({ code: "UPSERT_UPDATE_FAILED", message: updateErr.message });
+      }
     }
-    // Data type conversion error
+
+    // Other errors
     if (err.number === 257 || (err.originalError && err.originalError.code === 257)) {
       return res.status(400).json({ code: "TYPE_CONVERSION_ERROR", message: "Invalid data type for one or more fields." });
     }
-    // Not null constraint
     if (err.message && err.message.includes("cannot be null")) {
       return res.status(400).json({ code: "NOT_NULL_VIOLATION", message: "A required field is missing." });
     }
-
-    // Default
-    res.status(500).json({ code: "UNKNOWN_ERROR", message: err.message || "Unknown error" });
+    return res.status(500).json({ code: "UNKNOWN_ERROR", message: err.message || "Unknown error" });
   }
 });
 

@@ -91,7 +91,7 @@ export default function AdminLogin({ onClose }) {
           </p>
         </form>
 
-        {showRegister && <AdminRegister onClose={() => setShowRegister(false)} />}
+        {showRegister && <AdminRegister onClose={() => setShowRegister(false)} onSwitchToLogin={() => { setShowRegister(false); }} />}
         <ToastContainer />
       </div>
     </div>

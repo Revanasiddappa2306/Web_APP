@@ -1,26 +1,36 @@
 // src/pages/Register.js
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function UserRegister({ onClose }) {
+export default function UserRegister({ onClose, onSwitchToLogin }) {
+  const [id, setId] = useState(""); // 521ID
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [mobileNum, setMobileNum] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate 521ID and email
+    if (!id.trim()) {
+      toast.error("521ID is required", { position: "top-center", autoClose: 2000 });
+      return;
+    }
+    if (!email.endsWith("@alcon.com")) {
+      toast.error("Email must be a valid @alcon.com address", { position: "top-center", autoClose: 2000 });
+      return;
+    }
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/register-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, mobileNum, email, password }),
+        body: JSON.stringify({ id, firstName, lastName, mobileNum, email, password }),
       });
 
       const data = await res.json();
@@ -32,7 +42,7 @@ export default function UserRegister({ onClose }) {
         });
         setTimeout(() => {
           if (onClose) onClose();
-          navigate("/user-login");
+          if (onSwitchToLogin) onSwitchToLogin(); // <-- Open login popup/modal
         }, 1500);
       } else {
         toast.error(data.message || "Registration failed", {
@@ -62,6 +72,14 @@ export default function UserRegister({ onClose }) {
           <h2 className="text-2xl mb-4">User Registration</h2>
           <input
             type="text"
+            placeholder="521ID"
+            className="w-full p-2 mb-3 text-black rounded"
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            required
+          />
+          <input
+            type="text"
             placeholder="First Name"
             className="w-full p-2 mb-3 text-black rounded"
             value={firstName}
@@ -86,7 +104,7 @@ export default function UserRegister({ onClose }) {
           />
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Email (@alcon.com)"
             className="w-full p-2 mb-3 text-black rounded"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
