@@ -16,25 +16,14 @@ const HomeGuidePopup = ({ onClose }) => (
           <strong>Home Page Overview:</strong>
           <ul className="list-disc pl-5">
             <li>This is the entry point for all users and admins.</li>
-            <li>Use the <b>Login</b> dropdown in the navbar to sign in as Admin or User.</li>
-            <li>Access information about the application using the <b>About</b> button.</li>
+            <li>Use the <b>Login</b> to sign in as Admin or User.</li>
+            <li>Access information about the Alcon in <b>About</b> button.</li>
             <li>Contact the admin or support using the <b>Contact</b> button.</li>
-            <li>Submit your requirements directly from the home page using the <b>Submit Requirements</b> icon in the navbar.</li>
           </ul>
-        </div>
-        <div>
-          <strong>How to Submit Requirements:</strong>
-          <ol className="list-decimal pl-5">
-            <li>Click the <b>Submit Requirements</b> icon in the navbar (clipboard icon).</li>
-            <li>Fill in your name, 521ID, email, department, and describe your requirement.</li>
-            <li>Click <b>Submit</b> to send your requirement to the admin.</li>
-            <li>You will receive a confirmation message if your requirement is submitted successfully.</li>
-          </ol>
         </div>
         <div>
           <strong>Rules & Best Practices:</strong>
           <ul className="list-disc pl-5">
-            <li>Provide clear and concise details when submitting requirements.</li>
             <li>Use your official email and correct 521ID for identification.</li>
             <li>Do not share your login credentials with others.</li>
             <li>Contact admin for any issues or support using the Contact option.</li>

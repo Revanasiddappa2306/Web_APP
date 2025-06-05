@@ -99,10 +99,10 @@ const AdminDashboard = () => {
       <main
         className="flex-1 bg-slate-100 p-6 space-y-12"
         // style={{
-        //   backgroundImage: "url('/assets/bg_image.jpeg'), url('/assets/bg_image.jpeg')",
-        //   backgroundSize: "1300px 750px, 1300px 750px",
-        //   backgroundPosition: "top right , bottom right",
-        //   backgroundRepeat: "no-repeat, no-repeat",
+        //   backgroundImage: " url('/assets/bg-dh.jpeg')",
+        //   backgroundSize: "cover",
+        //   backgroundPosition: "center",
+        //   backgroundRepeat: "no-repeat",
         // }}
         
       >

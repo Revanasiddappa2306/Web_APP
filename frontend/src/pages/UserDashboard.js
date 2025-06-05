@@ -102,7 +102,13 @@ const UserDashboard = () => {
       
 
       {/* Main Content */}
-      <main className="flex-1 bg-slate-100 p-6 relative">
+      <main className="flex-1 bg-slate-100 p-6 relative"
+        style={{
+          backgroundImage: " url('/assets/bg-dh.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}>
         {/* Guide Icon Top Right */}
         <button
           type="button"
@@ -191,7 +197,10 @@ const UserDashboard = () => {
       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
       {showGuide && <UserGuidePopup onClose={() => setShowGuide(false)} />}
-      {showRequirement && (<RequirementPopup onClose={() => setShowRequirement(false)} onSubmit={async (form) => {
+      {showRequirement && (
+        <RequirementPopup
+          onClose={() => setShowRequirement(false)}
+          onSubmit={async (form) => {
             try {
               const res = await fetch("http://localhost:5000/api/requirements/submit", {
                 method: "POST",
@@ -204,6 +213,11 @@ const UserDashboard = () => {
             } catch {
               toast.error("❕Network error. Please try again.", { autoClose: 2000 });
             }
+          }}
+          user={{
+            name: user?.name || "",
+            id: user?.id || "",
+            email: user?.email || "",
           }}
         />
       )}

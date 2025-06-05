@@ -7,6 +7,7 @@ const RequestsPage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [popupContent, setPopupContent] = useState("");
   const [popupHeading, setPopupHeading] = useState(""); // New state for popup heading
+  const [showDeleted, setShowDeleted] = useState(false);
 
   useEffect(() => {
     // Set the browser tab title
@@ -18,6 +19,15 @@ const RequestsPage = () => {
       .then(res => res.json())
       .then(setRequests);
   }, []);
+
+  useEffect(() => {
+    const url = showDeleted
+      ? "http://localhost:5000/api/requirements/deleted"
+      : "http://localhost:5000/api/requirements/all";
+    fetch(url)
+      .then(res => res.json())
+      .then(setRequests);
+  }, [showDeleted]);
 
   // Mark as read and update local state
   const markAsRead = async (id) => {
@@ -57,7 +67,36 @@ const RequestsPage = () => {
 
   // Open popup and mark as read if unread
   const openPopup = async (content, name, id, reqId, isRead) => {
-    setPopupContent(content);
+    let displayContent = "";
+    try {
+      const reqObj = JSON.parse(content);
+
+      if (typeof reqObj === "object" && reqObj !== null) {
+        displayContent += reqObj.pageName ? `Page Name: ${reqObj.pageName}\n\n` : "";
+        if (reqObj.components && Array.isArray(reqObj.components)) {
+          displayContent += "Components and Quantities:\n";
+          reqObj.components.forEach(c => {
+            displayContent += `- ${c.name}: ${c.quantity}\n`;
+          });
+          displayContent += "\nComponent Fields:\n";
+          reqObj.components.forEach(c => {
+            c.fields.forEach((f, idx) => {
+              displayContent += `${c.name} Field${idx + 1}: ${f}\n`;
+            });
+          });
+        }
+        if (reqObj.justification) {
+          displayContent += `\nJustification:\n${reqObj.justification}`;
+        }
+      } else {
+        displayContent = content;
+      }
+    } catch (e) {
+      // If not JSON, show as is
+      displayContent = content;
+    }
+
+    setPopupContent(displayContent);
     setPopupHeading(`Requirements by ${name} (${id})`);
     setShowPopup(true);
     if (!isRead) {
@@ -85,6 +124,15 @@ const RequestsPage = () => {
       {/* Main Content */}
       <main className="flex-1 bg-slate-100 p-8">
         <h2 className="text-2xl font-bold mb-6">All Requests</h2>
+        {/* Toggle button for deleted requests */}
+        <div className="flex justify-end mb-4">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={() => setShowDeleted(v => !v)}
+          >
+            {showDeleted ? "Show Active Requests" : "Show Deleted Requests"}
+          </button>
+        </div>
         <table className="w-full table-auto border">
           <thead>
             <tr className="bg-gray-200">
@@ -95,6 +143,7 @@ const RequestsPage = () => {
               <th className="px-4 py-2">Department</th>
               <th className="px-4 py-2">Requirements</th>
               <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -132,6 +181,22 @@ const RequestsPage = () => {
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
+                </td>
+                <td className="px-4 py-2">
+                  {!showDeleted && (
+                    <button
+                      className="text-red-600 hover:underline"
+                      title="Delete"
+                      onClick={async () => {
+                        if (window.confirm("Are you sure you want to delete this request?")) {
+                          await fetch(`http://localhost:5000/api/requirements/delete/${req.RequirementID}`, { method: "POST" });
+                          setRequests(requests => requests.filter(r => r.RequirementID !== req.RequirementID));
+                        }
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

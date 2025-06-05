@@ -17,11 +17,12 @@ router.post("/submit", async (req, res) => {
   }
 });
 
+// Fetch all requirements
 router.get("/all", async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query(`
-      SELECT * FROM Alc_WebFramework.dbo.Requirements ORDER BY CreatedAt DESC
+      SELECT * FROM Alc_WebFramework.dbo.Requirements WHERE IsDeleted = 0 ORDER BY CreatedAt DESC
     `);
     res.json(result.recordset);
   } catch (err) {
@@ -70,6 +71,35 @@ router.post("/update-status/:id", async (req, res) => {
     res.json({ message: "Status updated" });
   } catch (err) {
     res.status(500).json({ message: "Failed to update status" });
+  }
+});
+
+// Soft delete endpoint
+router.post("/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    await pool.request().query(`
+      UPDATE Alc_WebFramework.dbo.Requirements
+      SET IsDeleted = 1
+      WHERE RequirementID = ${id}
+    `);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete" });
+  }
+});
+
+// Fetch deleted requests
+router.get("/deleted", async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT * FROM Alc_WebFramework.dbo.Requirements WHERE IsDeleted = 1 ORDER BY CreatedAt DESC
+    `);
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch deleted requirements" });
   }
 });
 

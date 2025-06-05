@@ -174,7 +174,8 @@ router.post("/user-login", async (req, res) => {
       token,
       user: {
         id: user.UserID,
-        name: user.FirstName + " " + user.LastName
+        name: user.FirstName + " " + user.LastName,
+        email: user.Email
       }
     });
   } catch (err) {
