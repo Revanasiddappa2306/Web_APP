@@ -6,6 +6,8 @@ import "react-toastify/dist/ReactToastify.css";
 import AboutPopup from "../components/popups/AboutPopup";
 import ContactPopup from "../components/popups/ContactPopup";
 import UserGuidePopup from "../components/popups/UserGuidePopup";
+import RequirementPopup from "../components/popups/RequirementPopup";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline"; // or use any icon
 
 const UserDashboard = () => {
@@ -18,6 +20,7 @@ const UserDashboard = () => {
   const [showGuide, setShowGuide] = useState(false);
   const [hoveredRole, setHoveredRole] = useState(null);
   const hideTimeout = useRef();
+  const [showRequirement, setShowRequirement] = useState(false);
 
   useEffect(() => {
     window.history.pushState(null, "", window.location.pathname);
@@ -82,6 +85,14 @@ const UserDashboard = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold">Alcon</h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
+          <button
+  onClick={() => setShowRequirement(true)}
+  className="flex items-center gap-1 hover:underline"
+  title="Submit Requirements"
+>
+  <ClipboardDocumentIcon className="h-5 w-5" />
+  <span className="hidden sm:inline">Submit Requirements</span>
+</button>
             <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
             <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
             <button onClick={handleLogout} className="hover:text-yellow-300">Logout</button>
@@ -180,6 +191,22 @@ const UserDashboard = () => {
       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
       {showGuide && <UserGuidePopup onClose={() => setShowGuide(false)} />}
+      {showRequirement && (<RequirementPopup onClose={() => setShowRequirement(false)} onSubmit={async (form) => {
+            try {
+              const res = await fetch("http://localhost:5000/api/requirements/submit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+              });
+              res.ok
+                ? toast.success("✅ Requirement submitted successfully!", { autoClose: 1500 })
+                : toast.error("❌Failed to submit requirement.", { autoClose: 1500 });
+            } catch {
+              toast.error("❕Network error. Please try again.", { autoClose: 2000 });
+            }
+          }}
+        />
+      )}
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center p-4 mt-auto shadow-inner">

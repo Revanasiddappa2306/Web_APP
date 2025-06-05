@@ -10,16 +10,26 @@ export default function UserLogin({ onClose }) {
   const [userIdOrEmail, setUserIdOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showRegister, setShowRegister] = useState(false);
+  const [loginType, setLoginType] = useState("user"); // "user" or "admin"
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/user-login", {
+      const endpoint =
+        loginType === "admin"
+          ? "http://localhost:5000/api/auth/admin-login"
+          : "http://localhost:5000/api/auth/user-login";
+      const body =
+        loginType === "admin"
+          ? { adminIdOrEmail: userIdOrEmail, password }
+          : { userIdOrEmail, password };
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userIdOrEmail, password }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -30,10 +40,18 @@ export default function UserLogin({ onClose }) {
           autoClose: 1500,
         });
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        if (loginType === "admin") {
+          localStorage.setItem("admin", JSON.stringify(data.admin));
+        } else {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
         setTimeout(() => {
           if (onClose) onClose();
-          navigate("/user-dashboard");
+          if (loginType === "admin") {
+            navigate("/admin-dashboard");
+          } else {
+            navigate("/user-dashboard");
+          }
         }, 1500);
       } else {
         toast.error(data.message || "Login failed!", {
@@ -60,7 +78,31 @@ export default function UserLogin({ onClose }) {
           &times;
         </button>
         <form onSubmit={handleSubmit}>
-          <h2 className="text-2xl mb-4">User Login</h2>
+          <h2 className="text-2xl mb-4">Login</h2>
+          <div className="flex gap-4 mb-3">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="loginType"
+                value="user"
+                checked={loginType === "user"}
+                onChange={() => setLoginType("user")}
+                className="mr-2"
+              />
+              User
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="loginType"
+                value="admin"
+                checked={loginType === "admin"}
+                onChange={() => setLoginType("admin")}
+                className="mr-2"
+              />
+              Admin
+            </label>
+          </div>
           <input
             type="text"
             placeholder="User ID or Email"
@@ -83,16 +125,22 @@ export default function UserLogin({ onClose }) {
           <p className="mt-2 text-sm">
             Don't have an account?{" "}
             <button
-                type="button"
-                onClick={() => setShowRegister(true)}
-                className="text-blue-400 underline bg-transparent border-none p-0 m-0 cursor-pointer"
-                style={{ background: "none" }} >
-                Register
+              type="button"
+              onClick={() => setShowRegister(true)}
+              className="text-blue-400 underline bg-transparent border-none p-0 m-0 cursor-pointer"
+              style={{ background: "none" }}
+            >
+              Register
             </button>
           </p>
         </form>
         {showRegister && (
-          <UserRegister onClose={() => setShowRegister(false)} onSwitchToLogin={() => {setShowRegister(false); }} />
+          <UserRegister
+            onClose={() => setShowRegister(false)}
+            onSwitchToLogin={() => {
+              setShowRegister(false);
+            }}
+          />
         )}
         <ToastContainer />
       </div>

@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function UserRegister({ onClose, onSwitchToLogin }) {
+  const [registerType, setRegisterType] = useState("user"); // "user" or "admin"
   const [id, setId] = useState(""); // 521ID
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -27,22 +28,32 @@ export default function UserRegister({ onClose, onSwitchToLogin }) {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register-user", {
+      const endpoint =
+        registerType === "admin"
+          ? "http://localhost:5000/api/auth/register-admin"
+          : "http://localhost:5000/api/auth/register-user";
+
+      const body =
+        registerType === "admin"
+          ? { id, firstName, lastName, mobileNum, email, password }
+          : { id, firstName, lastName, mobileNum, email, password };
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, firstName, lastName, mobileNum, email, password }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("User Registration Successful! Redirecting to login...", {
-          position: "top-center",
-          autoClose: 1500,
-        });
+        toast.success(
+          `${registerType === "admin" ? "Admin" : "User"} Registration Successful! Redirecting to login...`,
+          { position: "top-center", autoClose: 1500 }
+        );
         setTimeout(() => {
           if (onClose) onClose();
-          if (onSwitchToLogin) onSwitchToLogin(); // <-- Open login popup/modal
+          if (onSwitchToLogin) onSwitchToLogin();
         }, 1500);
       } else {
         toast.error(data.message || "Registration failed", {
@@ -69,7 +80,31 @@ export default function UserRegister({ onClose, onSwitchToLogin }) {
           &times;
         </button>
         <form onSubmit={handleSubmit}>
-          <h2 className="text-2xl mb-4">User Registration</h2>
+          <h2 className="text-2xl mb-4">Registration</h2>
+          <div className="flex gap-4 mb-3">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="registerType"
+                value="user"
+                checked={registerType === "user"}
+                onChange={() => setRegisterType("user")}
+                className="mr-2"
+              />
+              User
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="registerType"
+                value="admin"
+                checked={registerType === "admin"}
+                onChange={() => setRegisterType("admin")}
+                className="mr-2"
+              />
+              Admin
+            </label>
+          </div>
           <input
             type="text"
             placeholder="521ID"
@@ -119,13 +154,18 @@ export default function UserRegister({ onClose, onSwitchToLogin }) {
             required
           />
           <button className="w-full bg-green-600 p-2 rounded hover:bg-green-500">
-            Register
+            Register as {registerType === "admin" ? "Admin" : "User"}
           </button>
           <p className="mt-2 text-sm">
             Already have an account?{" "}
-            <a href="/user-login" className="text-blue-400">
+            <button
+              type="button"
+              onClick={onSwitchToLogin}
+              className="text-blue-400 underline bg-transparent border-none p-0 m-0 cursor-pointer"
+              style={{ background: "none" }}
+            >
               Login
-            </a>
+            </button>
           </p>
         </form>
         <ToastContainer />

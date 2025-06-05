@@ -25,7 +25,7 @@ const RequestsPage = () => {
     setRequests(reqs => reqs.map(r => r.RequirementID === id ? { ...r, IsRead: 1 } : r));
   };
 
-  // Update status in DB and local state
+  // Update status in DB and local state, then open Outlook mailto
   const updateStatus = async (id, status) => {
     await fetch(`http://localhost:5000/api/requirements/update-status/${id}`, {
       method: "POST",
@@ -33,6 +33,26 @@ const RequestsPage = () => {
       body: JSON.stringify({ status }),
     });
     setRequests(reqs => reqs.map(r => r.RequirementID === id ? { ...r, Status: status } : r));
+
+    // Find the request to get recipient email and details
+    const req = requests.find(r => r.RequirementID === id);
+    if (req) {
+      // Compose mailto link
+      const recipientEmail = req.Email;
+      const subject = encodeURIComponent(`Your Requirement Status Updated: ${status}`);
+      const body = encodeURIComponent(
+        `Hello ${req.Name},\n\n` +
+        `Your requirement (ID: ${req.RequirementID}) status has been updated to: ${status}.\n\n` +
+        `Details:\n` +
+        `521ID: ${req["521ID"]}\n` +
+        `Department: ${req.Department}\n` +
+        `Requirements: ${req.Requirements}\n\n` +
+        `If you have any questions, please reply to this email.\n\n` +
+        `Best regards,\nAlcon Admin`
+      );
+      // This will open Outlook or default mail client with the admin/device account as sender
+      window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+    }
   };
 
   // Open popup and mark as read if unread

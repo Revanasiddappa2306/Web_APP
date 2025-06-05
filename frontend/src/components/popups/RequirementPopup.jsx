@@ -13,9 +13,28 @@ const RequirementPopup = ({ onClose, onSubmit }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(form);
+    if (onSubmit) {
+      await onSubmit(form);
+    }
+
+    // Compose mailto link
+    const adminEmail = "revanasiddappa.malkood@alcon.com"; // Change to your admin email
+    const subject = encodeURIComponent("New Requirement Submitted");
+    const body = encodeURIComponent(
+      `A new requirement has been submitted:\n\n` +
+        `Name: ${form.name}\n` +
+        `521ID: ${form.id}\n` +
+        `Email: ${form.email}\n` +
+        `Department: ${form.department}\n` +
+        `Requirements: ${form.requirements}\n`
+    );
+    window.location.href = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
+
+    // Optionally, you can still call onSubmit(form) to save to DB
+    // onSubmit(form);
+
     onClose();
   };
 
@@ -28,8 +47,12 @@ const RequirementPopup = ({ onClose, onSubmit }) => {
         <button
           className="absolute top-2 right-2 text-xl text-gray-700 hover:text-red-500"
           onClick={onClose}
-        >×</button>
-        <h2 className="text-xl font-bold mb-4 text-alconBlue text-center">Submit Requirement</h2>
+        >
+          ×
+        </button>
+        <h2 className="text-xl font-bold mb-4 text-alconBlue text-center">
+          Submit Requirement
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="flex gap-4 mb-3">
             <input

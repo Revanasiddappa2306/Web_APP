@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AboutPopup from "../components/popups/AboutPopup";
 import ContactPopup from "../components/popups/ContactPopup";
-import AdminLogin from "../components/popups/AdminLoginPopup";
+// import AdminLogin from "../components/popups/AdminLoginPopup";
 import UserLogin from "../components/popups/UserLoginPopup";
-import RequirementPopup from "../components/popups/RequirementPopup";
-import { ClipboardDocumentIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import {  QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import HomeGuidePopup from "../components/popups/HomeGuidePopup";
 
 const HERO_HEIGHT = "70vh";
@@ -16,7 +15,7 @@ const Home = () => {
   const navigate = useNavigate();
   // Modal state for all popups
   const [modals, setModals] = useState({
-    about: false, contact: false, admin: false, user: false, req: false, guide: false
+    about: false, contact: false, login: false, guide: false
   });
 
   // Prevent browser back navigation from leaving the page
@@ -31,20 +30,6 @@ const Home = () => {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [navigate]);
 
-  // Handle requirement form submission
-  const handleRequirementSubmit = async (form) => {
-    try {
-      const res = await fetch("http://localhost:5000/api/requirements/submit", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
-      });
-      res.ok
-        ? toast.success("✅ Requirement submitted successfully!", { autoClose: 1500 })
-        : toast.error("❌Failed to submit requirement.", { autoClose: 1500 });
-    } catch {
-      toast.error("❕Network error. Please try again.", { autoClose: 2000 });
-    }
-  };
-
   // Open/close modal helpers
   const open = (key) => setModals((m) => ({ ...m, [key]: true }));
   const close = (key) => setModals((m) => ({ ...m, [key]: false }));
@@ -56,18 +41,12 @@ const Home = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Alcon</h1>
           <nav className="flex items-center gap-8 text-lg font-medium relative">
-            {/* Login Dropdown */}
-            <div className="group relative">
-              <button className="hover:underline focus:outline-none">Login</button>
-              <div className="absolute top-full left-0 mt-2 w-40 bg-white text-black shadow-lg rounded-md opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-200 z-10">
-                <button onClick={() => open("admin")} className="block w-full text-left px-4 py-2 hover:bg-blue-100">Admin Login</button>
-                <button onClick={() => open("user")} className="block w-full text-left px-4 py-2 hover:bg-blue-100">User Login</button>
-              </div>
-            </div>
-            {/* Submit Requirements */}
-            <button onClick={() => open("req")} className="flex items-center gap-1 hover:underline" title="Submit Requirements">
-              <ClipboardDocumentIcon className="h-5 w-5" />
-              <span className="hidden sm:inline">Submit Requirements</span>
+            {/* Single Login/Register */}
+            <button
+              onClick={() => open("login")}
+              className="hover:underline focus:outline-none"
+            >
+              Login
             </button>
             {/* About & Contact */}
             <button onClick={() => open("about")} className="hover:underline">About</button>
@@ -113,9 +92,7 @@ const Home = () => {
       {/* Popups/Modals */}
       {modals.about && <AboutPopup onClose={() => close("about")} />}
       {modals.contact && <ContactPopup onClose={() => close("contact")} />}
-      {modals.admin && <AdminLogin onClose={() => close("admin")} />}
-      {modals.user && <UserLogin onClose={() => close("user")} />}
-      {modals.req && <RequirementPopup onClose={() => close("req")} onSubmit={handleRequirementSubmit} />}
+      {modals.login && <UserLogin onClose={() => close("login")} />} {/* Single login/register */}
       {modals.guide && <HomeGuidePopup onClose={() => close("guide")} />}
 
       {/* Footer */}
