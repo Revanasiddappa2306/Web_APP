@@ -1,6 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const xlsx = require("xlsx");
 const router = express.Router();
 const { poolPromise, sql } = require("../config/db");
 require("dotenv").config();
@@ -127,7 +128,43 @@ router.post("/generate-form", (req, res) => {
       res.status(500).json({ message: "Error deleting pages", error: err.message });
     }
   });
- 
+
+
+  ////////////////////  export table data route ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  router.post("/export-table", async (req, res) => {
+    const { tableName } = req.body;
+  
+    if (!tableName) {
+      return res.status(400).json({ message: "Table name is required" });
+    }
+  
+    try {
+      const pool = await poolPromise;
+      const result = await pool.request().query(`SELECT * FROM [${tableName}]`);
+  
+      const rows = result.recordset;
+  
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "No data found in the table" });
+      }
+  
+      const workbook = xlsx.utils.book_new();
+      const worksheet = xlsx.utils.json_to_sheet(rows);
+      xlsx.utils.book_append_sheet(workbook, worksheet, tableName);
+  
+      // Convert workbook to a buffer
+      const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
+  
+      // Set headers and send the buffer as a response
+      res.setHeader("Content-Disposition", `attachment; filename=${tableName}.xlsx`);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.send(buffer);
+    } catch (err) {
+      console.error("Error exporting table:", err);
+      res.status(500).json({ message: "Failed to export table data" });
+    }
+  });
+  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   function generateComponentCode(fieldConfigs, pageName) {
     let stateDeclarations = '';
@@ -294,161 +331,209 @@ const tableCells = Object.entries(fieldConfigs).map(([_, config], index) => {
   return `<td className="p-2 border-b border-r ${getColWidth(type)}">{row["${safeFieldName}"]}</td>`;
 }).join("");
 
-    return `import React from "react";
-${imports}
-import { useState } from "react";
-import AboutPopup from "../../components/popups/AboutPopup";
-import ContactPopup from "../../components/popups/ContactPopup";
-import { useNavigate } from "react-router-dom";
+    const exportButton = `
+  <button
+    type="button"
+    className="bg-blue-600 text-white py-2 px-6 rounded text-sm shadow-lg"
+    onClick={async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/pages/export-table", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tableName: "${pageName}_Table" }),
+        });
 
-const GeneratedForm = () => {
-  ${stateDeclarations}
-  
-  const [tableData, setTableData] = React.useState([]);
-  const [selectedRows, setSelectedRows] = React.useState([]);
-  const [editingIndex, setEditingIndex] = React.useState(null);
-  const [showAbout, setShowAbout] = useState(false);
-  const [showContact, setShowContact] = useState(false);
-  const [search, setSearch] = React.useState("");
-  const navigate = useNavigate();
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "${pageName}_Table.xlsx";
+          link.click();
+        } else {
+          alert("❌ Failed to export data");
+        }
+      } catch (err) {
+        alert("❌ Unexpected error");
+      }
+    }}
+  >
+    Export to Excel
+  </button>
+`;
 
-  const goHome = () => {
-    const admin = localStorage.getItem("admin");
-    const user = localStorage.getItem("user");
-    if (admin && admin !== "undefined" && admin !== "{}") {
-      navigate("/admin-dashboard");
-    } else if (user && user !== "undefined" && user !== "{}") {
-      navigate("/user-dashboard");
-    } else {
-      navigate("/home");
-    }
-  };
+const adminCheck = `
+  const admin = localStorage.getItem("admin");
+  const isAdmin = admin && admin !== "undefined" && admin !== "{}";
+`;
 
-  // Fetch table data
-  React.useEffect(() => {
-    fetch("http://localhost:5000/api/tables/get-table-data", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tableName: "${pageName}_Table" })
-    })
-      .then(res => res.json())
-      .then(data => setTableData(data.rows || []));
-  }, []);
+const exportButtonConditional = `
+  {isAdmin && (
+    <div className="flex justify-end mb-4">
+      ${exportButton}
+    </div>
+  )}
+`;
 
-  // Helper: clear form fields
-  const clearFields = () => {
-    ${Object.entries(fieldConfigs).map(([_, config], index) => `setfield_${index}("");`).join("\n    ")}
-    setEditingIndex(null);
-  };
+return `
+  import React from "react";
+  ${imports}
+  import { useState } from "react";
+  import AboutPopup from "../../components/popups/AboutPopup";
+  import ContactPopup from "../../components/popups/ContactPopup";
+  import { useNavigate } from "react-router-dom";
+  import { ArrowUpIcon } from '@heroicons/react/24/solid';
 
-  // Enter (Insert)
-  const handleEnter = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/tables/insert-into-table", {
+  const GeneratedForm = () => {
+    ${stateDeclarations}
+    ${adminCheck}
+
+    const [tableData, setTableData] = React.useState([]);
+    const [selectedRows, setSelectedRows] = React.useState([]);
+    const [editingIndex, setEditingIndex] = React.useState(null);
+    const [showAbout, setShowAbout] = useState(false);
+    const [showContact, setShowContact] = useState(false);
+    const [search, setSearch] = React.useState("");
+    const navigate = useNavigate();
+
+    const goHome = () => {
+      const admin = localStorage.getItem("admin");
+      const user = localStorage.getItem("user");
+      if (admin && admin !== "undefined" && admin !== "{}") {
+        navigate("/admin-dashboard");
+      } else if (user && user !== "undefined" && user !== "{}") {
+        navigate("/user-dashboard");
+      } else {
+        navigate("/home");
+      }
+    };
+
+    // Fetch table data
+    React.useEffect(() => {
+      fetch("http://localhost:5000/api/tables/get-table-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tableName: "${pageName}_Table",
-          data: {
-            ${dataObject}
-          }
-        })
-      });
-      if (response.ok) window.location.reload();
-      else alert("❌ Failed to insert data");
-    } catch (err) {
-      alert("❌ Unexpected error");
-    }
-  };
+        body: JSON.stringify({ tableName: "${pageName}_Table" })
+      })
+        .then(res => res.json())
+        .then(data => setTableData(data.rows || []));
+    }, []);
 
-  // Update
-  const handleUpdate = async () => {
-    if (editingIndex === null) return;
-    const row = tableData[editingIndex];
-    try {
-      const response = await fetch("http://localhost:5000/api/tables/update-row", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tableName: "${pageName}_Table",
-          id: row.ID,
-          data: {
-            ${dataObject}
-          }
-        })
-      });
-      if (response.ok) window.location.reload();
-      else alert("❌ Failed to update data");
-    } catch (err) {
-      alert("❌ Unexpected error");
-    }
-  };
+    // Helper: clear form fields
+    const clearFields = () => {
+      ${Object.entries(fieldConfigs).map(([_, config], index) => `setfield_${index}("");`).join("\n    ")}
+      setEditingIndex(null);
+    };
 
-  // Delete
-  const handleDelete = async () => {
-    if (selectedRows.length === 0) return;
-    if (!window.confirm("Are you sure you want to delete the selected row(s)?")) return;
-    try {
-      const response = await fetch("http://localhost:5000/api/tables/delete-rows", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tableName: "${pageName}_Table",
-          ids: selectedRows
-        })
-      });
-      if (response.ok) window.location.reload();
-      else alert("❌ Failed to delete data");
-    } catch (err) {
-      alert("❌ Unexpected error");
-    }
-  };
+    // Enter (Insert)
+    const handleEnter = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/tables/insert-into-table", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tableName: "${pageName}_Table",
+            data: {
+              ${dataObject}
+            }
+          })
+        });
+        if (response.ok) window.location.reload();
+        else alert("❌ Failed to insert data");
+      } catch (err) {
+        alert("❌ Unexpected error");
+      }
+    };
 
-  // Row click: load data into fields
-  const handleRowClick = idx => {
-    const row = tableData[idx];
-    ${rowClickSetters}
-    setEditingIndex(idx);
-  };
+    // Update
+    const handleUpdate = async () => {
+      if (editingIndex === null) return;
+      const row = tableData[editingIndex];
+      try {
+        const response = await fetch("http://localhost:5000/api/tables/update-row", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tableName: "${pageName}_Table",
+            id: row.ID,
+            data: {
+              ${dataObject}
+            }
+          })
+        });
+        if (response.ok) window.location.reload();
+        else alert("❌ Failed to update data");
+      } catch (err) {
+        alert("❌ Unexpected error");
+      }
+    };
 
-  // Row select (checkbox)
-  const handleSelectRow = id => {
-    setSelectedRows(prev =>
-      prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
+    // Delete
+    const handleDelete = async () => {
+      if (selectedRows.length === 0) return;
+      if (!window.confirm("Are you sure you want to delete the selected row(s)?")) return;
+      try {
+        const response = await fetch("http://localhost:5000/api/tables/delete-rows", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tableName: "${pageName}_Table",
+            ids: selectedRows
+          })
+        });
+        if (response.ok) window.location.reload();
+        else alert("❌ Failed to delete data");
+      } catch (err) {
+        alert("❌ Unexpected error");
+      }
+    };
+
+    // Row click: load data into fields
+    const handleRowClick = idx => {
+      const row = tableData[idx];
+      ${rowClickSetters}
+      setEditingIndex(idx);
+    };
+
+    // Row select (checkbox)
+    const handleSelectRow = id => {
+      setSelectedRows(prev =>
+        prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
+      );
+    };
+
+    const filteredTableData = tableData.filter(row =>
+      Object.values(row).some(
+        val => val && val.toString().toLowerCase().includes(search.toLowerCase())
+      )
     );
-  };
 
-  const filteredTableData = tableData.filter(row =>
-    Object.values(row).some(
-      val => val && val.toString().toLowerCase().includes(search.toLowerCase())
-    )
-  );
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900">
+        {/* Navbar */}
+        <header className="bg-blue-900 text-white p-4 shadow-md">
+          <div className="container mx-auto flex justify-between items-center">
+            <h1
+              className="text-3xl font-bold cursor-pointer"
+              onClick={goHome}
+            >
+              Alcon
+            </h1>
+            <nav className="flex items-center gap-8 text-lg font-medium">
+              <button onClick={goHome} className="hover:text-yellow-300">Home</button>
+              <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
+              <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
+            </nav>
+          </div>
+        </header>
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900">
-      {/* Navbar */}
-      <header className="bg-blue-900 text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1
-            className="text-3xl font-bold cursor-pointer"
-            onClick={goHome}
-          >
-            Alcon
-          </h1>
-          <nav className="flex items-center gap-8 text-lg font-medium">
-            <button onClick={goHome} className="hover:text-yellow-300">Home</button>
-            <button onClick={() => setShowAbout(true)} className="hover:underline">About</button>
-            <button onClick={() => setShowContact(true)} className="hover:underline">Contact</button>
-          </nav>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
-        <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
-        <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
-          ${inputsCode}
-          <div className="flex justify-between items-center mt-4 mb-4 w-full">
+        {/* Main Content */}
+        <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
+          <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
+          ${exportButtonConditional}
+          <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
+            ${inputsCode}
+            <div className="flex justify-between items-center mt-4 mb-4 w-full">
     {/* Left: Empty */}
     <div className="w-1/3"></div>
     {/* Center: Buttons */}
@@ -477,58 +562,61 @@ const GeneratedForm = () => {
       />
     </div>
   </div>
-        </form>
-        <hr className="my-6 w-full border-t-2 border-gray-300" />
-        {/* Data Table */}
-        <div className="w-full flex justify-center mb-6">
-          <div className="w-full overflow-x-auto">
-            <table className="table-auto bg-white border border-gray-300 shadow mx-auto">
-              <thead>
-                <tr>
-                  <th className="p-2 border-b border-r min-w-[60px]"></th>
-                  ${tableHeaders}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTableData.map((row, idx) => (
-                  <tr
-                    key={row.ID}
-                    className="hover:bg-blue-100 cursor-pointer"
-                    onClick={() => handleRowClick(idx)}
-                  >
-                    <td className="p-2 border-b border-r text-center min-w-[60px]">
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(row.ID)}
-                        onChange={e => {
-                          e.stopPropagation();
-                          handleSelectRow(row.ID);
-                        }}
-                      />
-                    </td>
-                    ${tableCells}
+          </form>
+          <hr className="my-6 w-full border-t-2 border-gray-300" />
+          {/* Data Table */}
+          <div className="w-full flex justify-center mb-6">
+            <div className="w-full overflow-x-auto">
+              <table className="table-auto bg-white border border-gray-300 shadow mx-auto">
+                <thead>
+                  <tr>
+                    <th className="p-2 border-b border-r min-w-[60px]"></th>
+                    ${tableHeaders}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredTableData.map((row, idx) => (
+                    <tr
+                      key={row.ID}
+                      className="hover:bg-blue-100 cursor-pointer"
+                      onClick={() => handleRowClick(idx)}
+                    >
+                      <td className="p-2 border-b border-r text-center min-w-[60px]">
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(row.ID)}
+                          onChange={e => {
+                            e.stopPropagation();
+                            handleSelectRow(row.ID);
+                          }}
+                        />
+                      </td>
+                      ${tableCells}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </main>
-       {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
-       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
+        </main>
+        {showAbout && <AboutPopup onClose={() => setShowAbout(false)} />}
+        {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
 
-      {/* Footer */}
-      <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">
-        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
-      </footer>
-    </div>
-  );
-};
+        {/* Footer */}
+        <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">
+          <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+        </footer>
+      </div>
+    );
+  };
 
-export default GeneratedForm;
+  export default GeneratedForm;
 `;
   }
   
   
 module.exports = router;
+
+
+
 
