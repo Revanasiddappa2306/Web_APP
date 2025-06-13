@@ -5,6 +5,7 @@
   import AboutPopup from "../../components/popups/AboutPopup";
   import ContactPopup from "../../components/popups/ContactPopup";
   import { useNavigate } from "react-router-dom";
+  import { ArrowUpIcon } from '@heroicons/react/24/solid';
 
   const GeneratedForm = () => {
     const [field_0, setfield_0] = React.useState("");
@@ -40,7 +41,7 @@ const [field_1, setfield_1] = React.useState("");
       fetch("http://localhost:5000/api/tables/get-table-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tableName: "newww_Table" })
+        body: JSON.stringify({ tableName: "NT_Table" })
       })
         .then(res => res.json())
         .then(data => setTableData(data.rows || []));
@@ -60,10 +61,10 @@ const [field_1, setfield_1] = React.useState("");
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "newww_Table",
+            tableName: "NT_Table",
             data: {
-              "name": field_0,
-      "Age": field_1
+              "A": field_0,
+      "B": field_1
             }
           })
         });
@@ -83,11 +84,11 @@ const [field_1, setfield_1] = React.useState("");
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "newww_Table",
+            tableName: "NT_Table",
             id: row.ID,
             data: {
-              "name": field_0,
-      "Age": field_1
+              "A": field_0,
+      "B": field_1
             }
           })
         });
@@ -107,7 +108,7 @@ const [field_1, setfield_1] = React.useState("");
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "newww_Table",
+            tableName: "NT_Table",
             ids: selectedRows
           })
         });
@@ -121,8 +122,8 @@ const [field_1, setfield_1] = React.useState("");
     // Row click: load data into fields
     const handleRowClick = idx => {
       const row = tableData[idx];
-      setfield_0(row["name"] ?? "");
-    setfield_1(row["Age"] ?? "");
+      setfield_0(row["A"] ?? "");
+    setfield_1(row["B"] ?? "");
       setEditingIndex(idx);
     };
 
@@ -160,7 +161,7 @@ const [field_1, setfield_1] = React.useState("");
 
         {/* Main Content */}
         <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
-          <h1 className="text-2xl font-bold mb-6 text-center">newww</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">NT</h1>
           
   {isAdmin && (
     <div className="flex justify-end mb-4">
@@ -173,7 +174,7 @@ const [field_1, setfield_1] = React.useState("");
         const response = await fetch("http://localhost:5000/api/pages/export-table", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tableName: "newww_Table" }),
+          body: JSON.stringify({ tableName: "NT_Table" }),
         });
 
         if (response.ok) {
@@ -181,7 +182,7 @@ const [field_1, setfield_1] = React.useState("");
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
-          link.download = "newww_Table.xlsx";
+          link.download = "NT_Table.xlsx";
           link.click();
         } else {
           alert("❌ Failed to export data");
@@ -203,7 +204,7 @@ const [field_1, setfield_1] = React.useState("");
         
           <div key="TextField-0-0">
             <TextField
-              label="name"
+              label="A"
               value={field_0}
               onChange={setfield_0}
             />
@@ -211,7 +212,7 @@ const [field_1, setfield_1] = React.useState("");
         
           <div key="TextField-1-1">
             <TextField
-              label="Age"
+              label="B"
               value={field_1}
               onChange={setfield_1}
             />
@@ -257,7 +258,7 @@ const [field_1, setfield_1] = React.useState("");
                 <thead>
                   <tr>
                     <th className="p-2 border-b border-r min-w-[60px]"></th>
-                    <th className="p-2 border-b border-r min-w-[160px] w-[160px]">name</th><th className="p-2 border-b border-r min-w-[160px] w-[160px]">Age</th>
+                    <th className="p-2 border-b border-r min-w-[160px] w-[160px]">A</th><th className="p-2 border-b border-r min-w-[160px] w-[160px]">B</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,7 +278,7 @@ const [field_1, setfield_1] = React.useState("");
                           }}
                         />
                       </td>
-                      <td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["name"]}</td><td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["Age"]}</td>
+                      <td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["A"]}</td><td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["B"]}</td>
                     </tr>
                   ))}
                 </tbody>

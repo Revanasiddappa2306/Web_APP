@@ -1,20 +1,19 @@
 
   import React from "react";
   import TextField from "../../components/TextField";
-import DatePicker from "../../components/DatePicker";
   import { useState } from "react";
   import AboutPopup from "../../components/popups/AboutPopup";
   import ContactPopup from "../../components/popups/ContactPopup";
   import { useNavigate } from "react-router-dom";
+  import { ArrowUpIcon } from '@heroicons/react/24/solid';
 
   const GeneratedForm = () => {
     const [field_0, setfield_0] = React.useState("");
-const [field_1, setfield_1] = React.useState("");
 
     
-  const admin = localStorage.getItem("admin");
-  const isAdmin = admin && admin !== "undefined" && admin !== "{}";
-
+    const admin = localStorage.getItem("admin");
+    const isAdmin = admin && admin !== "undefined" && admin !== "{}";
+  
 
     const [tableData, setTableData] = React.useState([]);
     const [selectedRows, setSelectedRows] = React.useState([]);
@@ -41,7 +40,7 @@ const [field_1, setfield_1] = React.useState("");
       fetch("http://localhost:5000/api/tables/get-table-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tableName: "New_Table" })
+        body: JSON.stringify({ tableName: "HiPage_Table" })
       })
         .then(res => res.json())
         .then(data => setTableData(data.rows || []));
@@ -50,7 +49,6 @@ const [field_1, setfield_1] = React.useState("");
     // Helper: clear form fields
     const clearFields = () => {
       setfield_0("");
-    setfield_1("");
       setEditingIndex(null);
     };
 
@@ -61,10 +59,9 @@ const [field_1, setfield_1] = React.useState("");
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "New_Table",
+            tableName: "HiPage_Table",
             data: {
-              "Enter_Name": field_0,
-      "Enter_Date": field_1
+              "Test": field_0
             }
           })
         });
@@ -84,11 +81,10 @@ const [field_1, setfield_1] = React.useState("");
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "New_Table",
+            tableName: "HiPage_Table",
             id: row.ID,
             data: {
-              "Enter_Name": field_0,
-      "Enter_Date": field_1
+              "Test": field_0
             }
           })
         });
@@ -108,7 +104,7 @@ const [field_1, setfield_1] = React.useState("");
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "New_Table",
+            tableName: "HiPage_Table",
             ids: selectedRows
           })
         });
@@ -122,8 +118,7 @@ const [field_1, setfield_1] = React.useState("");
     // Row click: load data into fields
     const handleRowClick = idx => {
       const row = tableData[idx];
-      setfield_0(row["Enter_Name"] ?? "");
-    setfield_1(row["Enter_Date"] ?? "");
+      setfield_0(row["Test"] ?? "");
       setEditingIndex(idx);
     };
 
@@ -161,60 +156,17 @@ const [field_1, setfield_1] = React.useState("");
 
         {/* Main Content */}
         <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
-          <h1 className="text-2xl font-bold mb-6 text-center">New</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">HiPage</h1>
           
-  {isAdmin && (
-    <div className="flex justify-end mb-4">
-      
-  <button
-    type="button"
-    className="bg-blue-600 text-white py-2 px-6 rounded text-sm shadow-lg"
-    onClick={async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/pages/export-table", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tableName: "New_Table" }),
-        });
-
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "New_Table.xlsx";
-          link.click();
-        } else {
-          alert("❌ Failed to export data");
-        }
-      } catch (err) {
-        alert("❌ Unexpected error");
-      }
-    }}
-  >
-    Export to Excel
-  </button>
-
-    </div>
-  )}
-
           <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
             
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         
           <div key="TextField-0-0">
             <TextField
-              label="Enter Name"
+              label="Test"
               value={field_0}
               onChange={setfield_0}
-            />
-          </div>
-        
-          <div key="DatePicker-0-1">
-            <DatePicker
-              label="Enter Date"
-              value={field_1}
-              onChange={setfield_1}
             />
           </div>
         
@@ -247,6 +199,42 @@ const [field_1, setfield_1] = React.useState("");
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
+      
+  {isAdmin && (
+    <div className="relative group flex items-center">
+      <span
+        className="cursor-pointer"
+        onClick={async () => {
+          try {
+            const response = await fetch("http://localhost:5000/api/pages/export-table", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tableName: "HiPage_Table" }),
+            });
+
+            if (response.ok) {
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "HiPage_Table.xlsx";
+              link.click();
+            } else {
+              alert("❌ Failed to export data");
+            }
+          } catch (err) {
+            alert("❌ Unexpected error");
+          }
+        }}
+      >
+        <ArrowUpIcon className="h-5 w-5 text-black" />
+      </span>
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        Export Data to Excel
+      </div>
+    </div>
+  )}
+
     </div>
   </div>
           </form>
@@ -258,7 +246,7 @@ const [field_1, setfield_1] = React.useState("");
                 <thead>
                   <tr>
                     <th className="p-2 border-b border-r min-w-[60px]"></th>
-                    <th className="p-2 border-b border-r min-w-[160px] w-[160px]">Enter Name</th><th className="p-2 border-b border-r min-w-[120px] w-[120px]">Enter Date</th>
+                    <th className="p-2 border-b border-r min-w-[160px] w-[160px]">Test</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -278,7 +266,7 @@ const [field_1, setfield_1] = React.useState("");
                           }}
                         />
                       </td>
-                      <td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["Enter_Name"]}</td><td className="p-2 border-b border-r min-w-[120px] w-[120px]">{row["Enter_Date"] ? new Date(row["Enter_Date"]).toLocaleDateString() : ""}</td>
+                      <td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["Test"]}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -282,6 +282,49 @@ router.post("/generate-form", (req, res) => {
     };
     const imports = Array.from(usedComponents).map(c => importMap[c]).join("\n");
 
+    const adminCheck = `
+    const admin = localStorage.getItem("admin");
+    const isAdmin = admin && admin !== "undefined" && admin !== "{}";
+  `;
+
+      // Export functionality
+  const exportButton = `
+  {isAdmin && (
+    <div className="relative group flex items-center">
+      <span
+        className="cursor-pointer"
+        onClick={async () => {
+          try {
+            const response = await fetch("http://localhost:5000/api/pages/export-table", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tableName: "${pageName}_Table" }),
+            });
+
+            if (response.ok) {
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "${pageName}_Table.xlsx";
+              link.click();
+            } else {
+              alert("❌ Failed to export data");
+            }
+          } catch (err) {
+            alert("❌ Unexpected error");
+          }
+        }}
+      >
+        <ArrowUpIcon className="h-5 w-5 text-black" />
+      </span>
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+        Export Data to Excel
+      </div>
+    </div>
+  )}
+`;
+
     // Data object for insert/update
     const dataObject = Object.entries(fieldConfigs)
       .map(([_, config], index) => {
@@ -331,49 +374,7 @@ const tableCells = Object.entries(fieldConfigs).map(([_, config], index) => {
   return `<td className="p-2 border-b border-r ${getColWidth(type)}">{row["${safeFieldName}"]}</td>`;
 }).join("");
 
-    const exportButton = `
-  <button
-    type="button"
-    className="bg-blue-600 text-white py-2 px-6 rounded text-sm shadow-lg"
-    onClick={async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/pages/export-table", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tableName: "${pageName}_Table" }),
-        });
-
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "${pageName}_Table.xlsx";
-          link.click();
-        } else {
-          alert("❌ Failed to export data");
-        }
-      } catch (err) {
-        alert("❌ Unexpected error");
-      }
-    }}
-  >
-    Export to Excel
-  </button>
-`;
-
-const adminCheck = `
-  const admin = localStorage.getItem("admin");
-  const isAdmin = admin && admin !== "undefined" && admin !== "{}";
-`;
-
-const exportButtonConditional = `
-  {isAdmin && (
-    <div className="flex justify-end mb-4">
-      ${exportButton}
-    </div>
-  )}
-`;
+   
 
 return `
   import React from "react";
@@ -530,7 +531,7 @@ return `
         {/* Main Content */}
         <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
           <h1 className="text-2xl font-bold mb-6 text-center">${pageName.replace(/_/g, " ")}</h1>
-          ${exportButtonConditional}
+          
           <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
             ${inputsCode}
             <div className="flex justify-between items-center mt-4 mb-4 w-full">
@@ -560,6 +561,7 @@ return `
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
+      ${exportButton}
     </div>
   </div>
           </form>
