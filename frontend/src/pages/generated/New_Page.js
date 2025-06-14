@@ -1,6 +1,8 @@
 
   import React from "react";
-  import TextField from "../../components/TextField";
+  import DatePicker from "../../components/DatePicker";
+import Dropdown from "../../components/Dropdown";
+import TextField from "../../components/TextField";
   import { useState } from "react";
   import AboutPopup from "../../components/popups/AboutPopup";
   import ContactPopup from "../../components/popups/ContactPopup";
@@ -9,6 +11,9 @@
 
   const GeneratedForm = () => {
     const [field_0, setfield_0] = React.useState("");
+const [field_1, setfield_1] = React.useState("");
+const [field_2, setfield_2] = React.useState("");
+const [field_3, setfield_3] = React.useState("");
 
     
     const admin = localStorage.getItem("admin");
@@ -40,7 +45,7 @@
       fetch("http://localhost:5000/api/tables/get-table-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tableName: "HiPage_Table" })
+        body: JSON.stringify({ tableName: "New_Page_Table" })
       })
         .then(res => res.json())
         .then(data => setTableData(data.rows || []));
@@ -49,6 +54,9 @@
     // Helper: clear form fields
     const clearFields = () => {
       setfield_0("");
+    setfield_1("");
+    setfield_2("");
+    setfield_3("");
       setEditingIndex(null);
     };
 
@@ -59,9 +67,12 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "HiPage_Table",
+            tableName: "New_Page_Table",
             data: {
-              "Test": field_0
+              "Select_Date": field_0,
+      "Select_Shift": field_1,
+      "Enter_Name": field_2,
+      "Enter_Department": field_3
             }
           })
         });
@@ -81,10 +92,13 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "HiPage_Table",
+            tableName: "New_Page_Table",
             id: row.ID,
             data: {
-              "Test": field_0
+              "Select_Date": field_0,
+      "Select_Shift": field_1,
+      "Enter_Name": field_2,
+      "Enter_Department": field_3
             }
           })
         });
@@ -104,7 +118,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tableName: "HiPage_Table",
+            tableName: "New_Page_Table",
             ids: selectedRows
           })
         });
@@ -118,7 +132,10 @@
     // Row click: load data into fields
     const handleRowClick = idx => {
       const row = tableData[idx];
-      setfield_0(row["Test"] ?? "");
+      setfield_0(row["Select_Date"] ?? "");
+    setfield_1(row["Select_Shift"] ?? "");
+    setfield_2(row["Enter_Name"] ?? "");
+    setfield_3(row["Enter_Department"] ?? "");
       setEditingIndex(idx);
     };
 
@@ -156,17 +173,42 @@
 
         {/* Main Content */}
         <main className="flex-1 p-6 flex flex-col items-center justify-start w-full">
-          <h1 className="text-2xl font-bold mb-6 text-center">HiPage</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">New Page</h1>
           
           <form className="flex flex-col gap-4 w-full max-w-full" onSubmit={e => e.preventDefault()}>
             
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         
-          <div key="TextField-0-0">
-            <TextField
-              label="Test"
+          <div key="DatePicker-0-0">
+            <DatePicker
+              label="Select Date"
               value={field_0}
               onChange={setfield_0}
+            />
+          </div>
+        
+          <div key="Dropdown-0-1">
+            <Dropdown
+              label="Select Shift"
+              value={field_1}
+              onChange={setfield_1}
+              options={["A","B","C"]}
+            />
+          </div>
+        
+          <div key="TextField-0-2">
+            <TextField
+              label="Enter Name"
+              value={field_2}
+              onChange={setfield_2}
+            />
+          </div>
+        
+          <div key="TextField-1-3">
+            <TextField
+              label="Enter Department"
+              value={field_3}
+              onChange={setfield_3}
             />
           </div>
         
@@ -209,7 +251,7 @@
             const response = await fetch("http://localhost:5000/api/pages/export-table", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ tableName: "HiPage_Table" }),
+              body: JSON.stringify({ tableName: "New_Page_Table" }),
             });
 
             if (response.ok) {
@@ -217,7 +259,7 @@
               const url = window.URL.createObjectURL(blob);
               const link = document.createElement("a");
               link.href = url;
-              link.download = "HiPage_Table.xlsx";
+              link.download = "New_Page_Table.xlsx";
               link.click();
             } else {
               alert("❌ Failed to export data");
@@ -246,7 +288,7 @@
                 <thead>
                   <tr>
                     <th className="p-2 border-b border-r min-w-[60px]"></th>
-                    <th className="p-2 border-b border-r min-w-[160px] w-[160px]">Test</th>
+                    <th className="p-2 border-b border-r min-w-[120px] w-[120px]">Select Date</th><th className="p-2 border-b border-r min-w-[100px] w-[100px]">Select Shift</th><th className="p-2 border-b border-r min-w-[160px] w-[160px]">Enter Name</th><th className="p-2 border-b border-r min-w-[160px] w-[160px]">Enter Department</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -266,7 +308,7 @@
                           }}
                         />
                       </td>
-                      <td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["Test"]}</td>
+                      <td className="p-2 border-b border-r min-w-[120px] w-[120px]">{row["Select_Date"] ? new Date(row["Select_Date"]).toLocaleDateString() : ""}</td><td className="p-2 border-b border-r min-w-[100px] w-[100px]">{row["Select_Shift"]}</td><td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["Enter_Name"]}</td><td className="p-2 border-b border-r min-w-[160px] w-[160px]">{row["Enter_Department"]}</td>
                     </tr>
                   ))}
                 </tbody>
