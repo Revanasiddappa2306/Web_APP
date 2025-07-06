@@ -165,7 +165,7 @@ const ConfigureFields = () => {
             className="text-3xl font-bold cursor-pointer"
             onClick={() => navigate("/admin-dashboard")}
           >
-            Alcon
+            Web_APP
           </h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
             <button onClick={() => navigate("/admin-dashboard")} className="hover:text-yellow-300">Home</button>
@@ -327,7 +327,7 @@ const ConfigureFields = () => {
 
       {/* Footer */}
       <footer className="bg-blue-900 text-white text-center p-4 mt-auto shadow-inner">
-        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
       </footer>
     </div>
   );

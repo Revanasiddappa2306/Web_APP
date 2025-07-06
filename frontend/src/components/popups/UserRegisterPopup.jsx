@@ -22,8 +22,8 @@ export default function UserRegister({ onClose, onSwitchToLogin }) {
       toast.error("521ID is required", { position: "top-center", autoClose: 2000 });
       return;
     }
-    if (!email.endsWith("@alcon.com")) {
-      toast.error("Email must be a valid @alcon.com address", { position: "top-center", autoClose: 2000 });
+    if (!email.endsWith("@gmail.com")) {
+      toast.error("Email must be a valid @gmail.com address", { position: "top-center", autoClose: 2000 });
       return;
     }
 
@@ -139,7 +139,7 @@ export default function UserRegister({ onClose, onSwitchToLogin }) {
           />
           <input
             type="email"
-            placeholder="Email (@alcon.com)"
+            placeholder="Email (@gmail.com)"
             className="w-full p-2 mb-3 text-black rounded"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

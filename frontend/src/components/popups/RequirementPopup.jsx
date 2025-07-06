@@ -145,7 +145,7 @@ const RequirementPopup = ({ onClose, onSubmit, user }) => {
     emailBody += `\nJustification:\n${justification}\n\nThanks & Regards\n${user.name}`;
 
     // Compose mailto
-    const adminEmail = "revanasiddappa.malkood@alcon.com";
+    const adminEmail = "siddumalkood2306@gmail.com";
     const subject = encodeURIComponent("New Requirement Submitted");
     const body = encodeURIComponent(emailBody);
 

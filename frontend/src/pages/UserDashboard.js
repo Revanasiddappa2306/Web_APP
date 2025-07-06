@@ -83,7 +83,7 @@ const UserDashboard = () => {
       {/* Navbar */}
       <header className="bg-alconBlue text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Alcon</h1>
+          <h1 className="text-3xl font-bold">Web_APP</h1>
           <nav className="flex items-center gap-8 text-lg font-medium">
           <button
   onClick={() => setShowRequirement(true)}
@@ -224,7 +224,7 @@ const UserDashboard = () => {
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center p-4 mt-auto shadow-inner">
-        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()}  All rights reserved.</p>
       </footer>
       <ToastContainer />
     </div>

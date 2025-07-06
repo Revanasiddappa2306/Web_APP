@@ -39,7 +39,7 @@ const Home = () => {
       {/* Header */}
       <header className="bg-alconBlue text-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Alcon</h1>
+          <h1 className="text-2xl font-bold">Home</h1>
           <nav className="flex items-center gap-8 text-lg font-medium relative">
             {/* Single Login/Register */}
             <button
@@ -58,16 +58,14 @@ const Home = () => {
       {/* Hero Section with video and curve */}
       <section className="relative w-full" style={{ height: HERO_HEIGHT, minHeight: 350, overflow: "hidden" }}>
         {/* Background Video */}
-        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ pointerEvents: "none" }}>
-          <source src="https://www.alcon.com/sites/g/files/rbvwei4411/files/2024-09/Evergreen_Campaign_whitebg.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        
         {/* Guide Button */}
         <button type="button" className="absolute top-6 right-8 text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 z-20"
           onClick={() => open("guide")} style={{ zIndex: 20 }}>
           <QuestionMarkCircleIcon className="h-6 w-6" />
           <span className="hidden sm:inline font-medium">Guide</span>
         </button>
+        
         {/* SVG Blue Curve */}
         <div className="absolute left-0 w-full" style={{ bottom: "-10px", height: "80px", pointerEvents: "none", zIndex: 10 }}>
           <svg viewBox="0 0 1440 120" className="w-full h-full" preserveAspectRatio="none"
@@ -80,6 +78,7 @@ const Home = () => {
       {/* Blue Section with tagline and description */}
       <section className="w-full bg-[#005eb8] text-white text-center flex flex-col justify-end"
         style={{ paddingTop: "10px", paddingBottom: "20px" }}>
+          
         <h2 className="text-2xl md:text-3xl font-light mb-1">We Help People See Brilliantly</h2>
         <p className="text-base md:text-lg max-w-3xl mx-auto">
           We aspire to lead the world in innovating life-changing vision products because when people see brilliantly, they live brilliantly.
@@ -87,7 +86,10 @@ const Home = () => {
       </section>
 
       {/* Main Content */}
-      <main className="flex-1 bg-white">{/* ...rest of your page content... */}</main>
+      <main className="flex-1 bg-white">{/* ...rest of your page content... */}
+
+        
+      </main>
 
       {/* Popups/Modals */}
       {modals.about && <AboutPopup onClose={() => close("about")} />}
@@ -97,7 +99,7 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center py-4 shadow-inner">
-        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()}  All rights reserved.</p>
       </footer>
       <ToastContainer />
     </div>

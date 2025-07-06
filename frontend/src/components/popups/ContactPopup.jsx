@@ -15,32 +15,18 @@ const ContactPopup = ({ onClose }) => (
           <div>
             <strong>Email:</strong>{" "}
             <a
-              href="mailto:revansiddappa.malkood@alcon.com"
+              href="mailto:siddumalkood2306"
               className="text-blue-700 underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              revansiddappa.malkood@alcon.com
+              siddumalkood2306@gmail.com
             </a>
             <br />
-            <strong>Teams:</strong>{" "}
-            <a
-              href="https://teams.microsoft.com/l/chat/0/0?users=MALKORE1@Alcon.net"
-              className="text-blue-700 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Chat with Malkood, Revanasiddappa
-            </a>
+           
           </div>
-          <div>
-            <strong>Phone:</strong> <span> 9535664511 </span>
-          </div>
-          <div>
-            <strong>Address:</strong>
-            <p>Alcon Laboratories.<br />
-              10th Floor,RMZ Azure, Bengaluru, India</p>
-          </div>
+          
+          
         </div>
       </div>
     </div>

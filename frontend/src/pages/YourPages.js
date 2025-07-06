@@ -79,7 +79,7 @@ const YourPages = () => {
         <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/admin-dashboard")}>
             {/* <img src={AlconLogo} alt="Alcon Logo" className="h-10 w-10 rounded-full" /> */}
-            <span className="text-3xl font-bold">Alcon</span>
+            <span className="text-3xl font-bold">Web_APP</span>
           </div>
 
           <nav className="flex gap-6 text-lg font-medium">
@@ -166,7 +166,7 @@ const YourPages = () => {
 
       {/* Footer */}
       <footer className="bg-alconBlue text-white text-center p-4">
-        <p>&copy; {new Date().getFullYear()} Alcon. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()}  All rights reserved.</p>
       </footer>
       <ToastContainer />
     </div>
